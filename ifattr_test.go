@@ -62,6 +62,7 @@ func testSockAddrAttr(t *testing.T, sai interface{}) {
 		// IPv4
 		{"broadcast", true, false, false},
 		{"uint32", true, false, false},
+		{"aws_dns", true, false, false},
 		// IPv6
 		{"uint128", false, true, false},
 		// Unix

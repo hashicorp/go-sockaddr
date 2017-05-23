@@ -983,9 +983,38 @@ func TestIPv4CmpRFC(t *testing.T) {
 }
 
 func TestIPv4Attrs(t *testing.T) {
-	const expectedNumAttrs = 3
+	const expectedNumAttrs = 4
 	attrs := sockaddr.IPv4Attrs()
 	if len(attrs) != expectedNumAttrs {
 		t.Fatalf("wrong number of IPv4Attrs: %d vs %d", len(attrs), expectedNumAttrs)
+	}
+}
+
+func TestIPv4Attrs_AWS_DNS(t *testing.T) {
+	for idx, test := range []struct {
+		input  string
+		output string
+	}{
+		{
+			input:  "10.200.40.1/16",
+			output: "10.200.0.2",
+		},
+		{
+			input:  "10.210.28.4/8",
+			output: "10.0.0.2",
+		},
+		{
+			input:  "192.168.78.139/24",
+			output: "192.168.78.2",
+		},
+	} {
+		ipv4, err := sockaddr.NewIPv4Addr(test.input)
+		if err != nil {
+			t.Fatalf("[%d] Unable to create an IPv4Addr from %+q: %v", idx, test.input, err)
+		}
+		result := sockaddr.IPv4AddrAttr(ipv4, "aws_dns")
+		if result != test.output {
+			t.Fatalf("[%d] Expect aws_dns %+q to be %s, got %s", idx, test.input, test.output, result)
+		}
 	}
 }

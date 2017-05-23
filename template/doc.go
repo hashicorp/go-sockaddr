@@ -292,6 +292,7 @@ IPAddr Type:
 IPv4Addr Type:
   - `broadcast`
   - `uint32`: unsigned integer representation of the value
+  - `aws_dns`: This IP address is the IP address at the base of the VPC network range "plus two." For example, if the CIDR range for your VPC is 10.0.0.0/16, the IP address of the DNS server is 10.0.0.2.
 
 IPv6Addr Type:
   - `uint128`: unsigned integer representation of the value
