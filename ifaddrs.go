@@ -961,9 +961,14 @@ func IfAddrsMath(operation, value string, inputIfAddrs IfAddrs) (IfAddrs, error)
 }
 
 // IncludeIfs returns an IfAddrs based on the passed in selector.
-func IncludeIfs(selectorName, selectorParam string, inputIfAddrs IfAddrs) (IfAddrs, error) {
+func IncludeIfs(args ...interface{}) (IfAddrs, error) {
 	var includedIfs IfAddrs
 	var err error
+
+	selectorName, selectorParam, inputIfAddrs, err := parseIncludeExcludeArgs(args...)
+	if err != nil {
+		return nil, err
+	}
 
 	switch strings.ToLower(selectorName) {
 	case "address":
@@ -974,6 +979,8 @@ func IncludeIfs(selectorName, selectorParam string, inputIfAddrs IfAddrs) (IfAdd
 		includedIfs, _, err = IfByName(selectorParam, inputIfAddrs)
 	case "network":
 		includedIfs, _, err = IfByNetwork(selectorParam, inputIfAddrs)
+	case "private":
+		includedIfs, _, err = IfByRFC(selectorParam, inputIfAddrs)
 	case "port":
 		includedIfs, _, err = IfByPort(selectorParam, inputIfAddrs)
 	case "rfc", "rfcs":
@@ -994,9 +1001,14 @@ func IncludeIfs(selectorName, selectorParam string, inputIfAddrs IfAddrs) (IfAdd
 }
 
 // ExcludeIfs returns an IfAddrs based on the passed in selector.
-func ExcludeIfs(selectorName, selectorParam string, inputIfAddrs IfAddrs) (IfAddrs, error) {
+func ExcludeIfs(args ...interface{}) (IfAddrs, error) {
 	var excludedIfs IfAddrs
 	var err error
+
+	selectorName, selectorParam, inputIfAddrs, err := parseIncludeExcludeArgs(args...)
+	if err != nil {
+		return nil, err
+	}
 
 	switch strings.ToLower(selectorName) {
 	case "address":
@@ -1007,6 +1019,8 @@ func ExcludeIfs(selectorName, selectorParam string, inputIfAddrs IfAddrs) (IfAdd
 		_, excludedIfs, err = IfByName(selectorParam, inputIfAddrs)
 	case "network":
 		_, excludedIfs, err = IfByNetwork(selectorParam, inputIfAddrs)
+	case "private":
+		_, excludedIfs, err = IfByRFC(selectorParam, inputIfAddrs)
 	case "port":
 		_, excludedIfs, err = IfByPort(selectorParam, inputIfAddrs)
 	case "rfc", "rfcs":
@@ -1278,4 +1292,32 @@ func parseDefaultIfNameWindowsIPConfig(defaultIPAddr, routeOut string) (string, 
 	}
 
 	return "", errors.New("No default interface found with matching IP")
+}
+
+// parseIncludeExcludeArgs parses the arguments given to the `include` and
+// `exclude` filters in the template allowing for the `private` selector
+// to work correctly without any arguments.
+func parseIncludeExcludeArgs(args ...interface{}) (string, string, IfAddrs, error) {
+	var params string
+
+	if len(args) < 2 {
+		return "", "", nil, fmt.Errorf("missing arguments")
+	}
+
+	// Arguments for the selector are: "name", "parameter",
+	// and a list of interface objects (of the `IfAddr` type).
+	name := args[0].(string)
+	switch name {
+	case "private":
+		// RFC 6890, see `rfc.go` for details.
+		params = "6890"
+	default:
+		if len(args) < 3 {
+			return "", "", nil, fmt.Errorf("wrong number of arguments for %s: want 3 got %d", name, len(args))
+		}
+		params = args[1].(string)
+	}
+	ifAddrs := args[len(args)-1].(IfAddrs)
+
+	return name, params, ifAddrs, nil
 }
