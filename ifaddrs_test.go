@@ -981,6 +981,39 @@ func TestIncludeExcludeIfs(t *testing.T) {
 			includeParam: `::/127`,
 		},
 		{
+			name: "private",
+			ifAddrs: sockaddr.IfAddrs{
+				sockaddr.IfAddr{
+					SockAddr: sockaddr.MustIPAddr("1.2.3.4"),
+				},
+				sockaddr.IfAddr{
+					SockAddr: sockaddr.MustIPv4Addr("10.2.3.4"),
+				},
+				sockaddr.IfAddr{
+					SockAddr: sockaddr.MustIPAddr("203.0.113.0"),
+				},
+				sockaddr.IfAddr{
+					SockAddr: sockaddr.MustIPAddr("::1"),
+				},
+			},
+			excludeName:  "private",
+			excludeNum:   1,
+			excludeParam: ``,
+			includeName:  "private",
+			includeNum:   3,
+			includeParam: ``,
+		},
+		{
+			name:         "private empty addresses",
+			ifAddrs:      sockaddr.IfAddrs{},
+			excludeName:  "private",
+			excludeNum:   0,
+			excludeParam: ``,
+			includeName:  "private",
+			includeNum:   0,
+			includeParam: ``,
+		},
+		{
 			name: "port",
 			ifAddrs: sockaddr.IfAddrs{
 				sockaddr.IfAddr{
