@@ -141,9 +141,9 @@ func GetPublicIPs() (string, error) {
 	return strings.Join(ips, " "), nil
 }
 
-// GetInterfaceIP returns a string with a single IP address sorted by the size
-// of the network (i.e. IP addresses with a smaller netmask, larger network
-// size, are sorted first).  This function is the `eval` equivalent of:
+// GetInterfaceIP returns a string with a single forwardable IP address sorted
+// by the size of the network (i.e. IP addresses with a smaller netmask, larger
+// network size, are sorted first).  This function is the `eval` equivalent of:
 //
 // ```
 // $ sockaddr eval -r '{{GetAllInterfaces | include "name" <<ARG>> | sort "type,size" | include "flag" "forwardable" | attr "address" }}'
