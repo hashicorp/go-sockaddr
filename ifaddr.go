@@ -153,15 +153,52 @@ func GetInterfaceIP(namedIfRE string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	flags := []string{
+		"forwardable",
+	}
+	return getInterfaceIPByFlags(namedIfRE, flags, ifAddrs)
+}
 
-	ifAddrs, _, err = IfByName(namedIfRE, ifAddrs)
+// GetInterfaceIPRegardlessOfInterfaceFlags returns a string with a single IP address sorted
+// by the size of the network (i.e. IP addresses with a smaller netmask, larger
+// network size, are sorted first).  This function is the `eval` equivalent of:
+//
+// ```
+// $ sockaddr eval -r '{{GetAllInterfaces | include "name" <<ARG>> | sort "type,size" | attr "address" }}'
+/// ```
+func GetInterfaceIPRegardlessOfInterfaceFlags(namedIfRE string) (string, error) {
+	ifAddrs, err := GetAllInterfaces()
+	if err != nil {
+		return "", err
+	}
+	return getInterfaceIPByFlags(namedIfRE, nil, ifAddrs)
+}
+
+// getInterfaceIPByFlags returns a string with a single IP address sorted
+// by the size of the network (i.e. IP addresses with a smaller netmask, larger
+// network size, are sorted first).  This function is the `eval` equivalent of:
+//
+// ```
+// $ sockaddr eval -r '{{GetAllInterfaces | include "name" <<ARG>> | sort "type,size" | <<FLAGS>> | attr "address" }}'
+/// ```
+//
+// where <<FLAGS>> represents a logical AND between all the supplied flags.
+//
+// For example:
+//
+// with flags:=[]string{"forwardable", "broadcast"} => `include "flag" "forwardable" | include "flag" "broadcast"`
+///
+func getInterfaceIPByFlags(namedIfRE string, flags []string, ifAddrs IfAddrs) (string, error) {
+	ifAddrs, _, err := IfByName(namedIfRE, ifAddrs)
 	if err != nil {
 		return "", err
 	}
 
-	ifAddrs, _, err = IfByFlag("forwardable", ifAddrs)
-	if err != nil {
-		return "", err
+	for _, flag := range flags {
+		ifAddrs, _, err = IfByFlag(flag, ifAddrs)
+		if err != nil {
+			return "", err
+		}
 	}
 
 	ifAddrs, err = SortIfBy("+type,+size", ifAddrs)
