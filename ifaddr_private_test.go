@@ -36,6 +36,15 @@ func Test_getInterfaceIPByFlags(t *testing.T) {
 				Flags: net.FlagBroadcast,
 			},
 		},
+		{
+			SockAddr: MustIPv6Addr("fe80::/10"),
+			Interface: net.Interface{
+				Index: 3,
+				MTU:   1500,
+				Name:  "dummyv6",
+				Flags: net.FlagBroadcast,
+			},
+		},
 	}
 
 	type args struct {
@@ -84,10 +93,22 @@ func Test_getInterfaceIPByFlags(t *testing.T) {
 			want:    "",
 			wantErr: false,
 		},
+		{
+			name:    "dummyv6 (RFC4291) IPv6: no flags provided => fe80::",
+			args:    args{namedIfRE: "dummyv6", flags: []string{}},
+			want:    "fe80::",
+			wantErr: false,
+		},
+		{
+			name:    "dummyv6 (RFC4291) IPv6: `forwardable` flag provided => empty string",
+			args:    args{namedIfRE: "dummyv6", flags: []string{"forwardable"}},
+			want:    "",
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := getInterfaceIPByFlags(tt.args.namedIfRE, tt.args.flags, ifAddrs)
+			got, err := getInterfaceIP(tt.args.namedIfRE, tt.args.flags, ifAddrs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("getInterfaceIPByFlags() error = %v, wantErr %v", err, tt.wantErr)
 				return

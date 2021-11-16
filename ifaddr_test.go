@@ -129,7 +129,7 @@ func TestGetInterfaceIP(t *testing.T) {
 }
 
 func TestGetInterfaceIPRegardlessOfInterfaceFlags(t *testing.T) {
-	ip, err := sockaddr.GetInterfaceIPRegardlessOfInterfaceFlags(`^.*[\d]$`)
+	ip, err := sockaddr.GetInterfaceIPWithoutInterfaceFlags(`^.*[\d]$`)
 	if err != nil {
 		t.Fatalf("regexp failed: %v", err)
 	}
