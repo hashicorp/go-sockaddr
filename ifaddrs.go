@@ -236,10 +236,14 @@ func IfAttrs(selectorName string, ifAddrs IfAddrs) (string, error) {
 	return attrVal, err
 }
 
-// GetAllInterfaces iterates over all available network interfaces and finds all
+// GetAllInterfaces proxies the reference to getAllInterfaces in order to
+// allow stubbing in tests by temporarily swapping implementations.
+var GetAllInterfaces = getAllInterfaces
+
+// getAllInterfaces iterates over all available network interfaces and finds all
 // available IP addresses on each interface and converts them to
 // sockaddr.IPAddrs, and returning the result as an array of IfAddr.
-func GetAllInterfaces() (IfAddrs, error) {
+func getAllInterfaces() (IfAddrs, error) {
 	ifs, err := net.Interfaces()
 	if err != nil {
 		return nil, err

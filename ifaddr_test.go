@@ -118,24 +118,200 @@ func TestGetPublicIPs(t *testing.T) {
 }
 
 func TestGetInterfaceIP(t *testing.T) {
-	ip, err := sockaddr.GetInterfaceIP(`^.*[\d]$`)
-	if err != nil {
-		t.Fatalf("regexp failed: %v", err)
+
+	ifAddrs := sockaddr.IfAddrs{
+		{
+			SockAddr: sockaddr.MustIPv4Addr("127.0.0.0/8"),
+			Interface: net.Interface{
+				Index: 1,
+				MTU:   65536,
+				Name:  "lo",
+				Flags: net.FlagUp | net.FlagLoopback,
+			},
+		},
+		{
+			SockAddr: sockaddr.MustIPv4Addr("172.16.0.0/12"),
+			Interface: net.Interface{
+				Index: 2,
+				MTU:   1500,
+				Name:  "eth0",
+				Flags: net.FlagUp,
+			},
+		},
+		{
+			SockAddr: sockaddr.MustIPv4Addr("169.254.0.0/16"),
+			Interface: net.Interface{
+				Index: 3,
+				MTU:   1500,
+				Name:  "dummy",
+				Flags: net.FlagBroadcast,
+			},
+		},
+		{
+			SockAddr: sockaddr.MustIPv6Addr("fe80::/10"),
+			Interface: net.Interface{
+				Index: 3,
+				MTU:   1500,
+				Name:  "dummyv6",
+				Flags: net.FlagBroadcast,
+			},
+		},
 	}
 
-	if ip == "" {
-		t.Skip("it's hard to test this reliably")
+	type args struct {
+		namedIfRE string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name:    "loopback => empty string",
+			args:    args{namedIfRE: "lo"},
+			want:    "",
+			wantErr: false,
+		},
+		{
+			name:    "private (RFC1918) => 172.16.0.0",
+			args:    args{namedIfRE: "eth0"},
+			want:    "172.16.0.0",
+			wantErr: false,
+		},
+		{
+			name:    "dummy (RFC3927) => empty string",
+			args:    args{namedIfRE: "dummy"},
+			want:    "",
+			wantErr: false,
+		},
+		{
+			name:    "dummyv6 (RFC4291) IPv6 => empty string",
+			args:    args{namedIfRE: "dummyv6"},
+			want:    "",
+			wantErr: false,
+		},
+	}
+
+	// setting up a "fake environment" by temporarily controlling what's returned by
+	// `sockaddr.GetAllInterfaces`
+	realGetAllInterfaces := sockaddr.GetAllInterfaces
+	defer func() { sockaddr.GetAllInterfaces = realGetAllInterfaces }()
+
+	sockaddr.GetAllInterfaces = func() (sockaddr.IfAddrs, error) {
+		return ifAddrs, nil
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := sockaddr.GetInterfaceIP(tt.args.namedIfRE)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetInterfaceIP() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("GetInterfaceIP() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
 
-func TestGetInterfaceIPRegardlessOfInterfaceFlags(t *testing.T) {
-	ip, err := sockaddr.GetInterfaceIPWithoutInterfaceFlags(`^.*[\d]$`)
-	if err != nil {
-		t.Fatalf("regexp failed: %v", err)
+func TestGetInterfaceIPWithoutInterfaceFlags(t *testing.T) {
+
+	ifAddrs := sockaddr.IfAddrs{
+		{
+			SockAddr: sockaddr.MustIPv4Addr("127.0.0.0/8"),
+			Interface: net.Interface{
+				Index: 1,
+				MTU:   65536,
+				Name:  "lo",
+				Flags: net.FlagUp | net.FlagLoopback,
+			},
+		},
+		{
+			SockAddr: sockaddr.MustIPv4Addr("172.16.0.0/12"),
+			Interface: net.Interface{
+				Index: 2,
+				MTU:   1500,
+				Name:  "eth0",
+				Flags: net.FlagUp,
+			},
+		},
+		{
+			SockAddr: sockaddr.MustIPv4Addr("169.254.0.0/16"),
+			Interface: net.Interface{
+				Index: 3,
+				MTU:   1500,
+				Name:  "dummy",
+				Flags: net.FlagBroadcast,
+			},
+		},
+		{
+			SockAddr: sockaddr.MustIPv6Addr("fe80::/10"),
+			Interface: net.Interface{
+				Index: 3,
+				MTU:   1500,
+				Name:  "dummyv6",
+				Flags: net.FlagBroadcast,
+			},
+		},
 	}
 
-	if ip == "" {
-		t.Skip("it's hard to test this reliably")
+	type args struct {
+		namedIfRE string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name:    "loopback => 127.0.0.0",
+			args:    args{namedIfRE: "lo"},
+			want:    "127.0.0.0",
+			wantErr: false,
+		},
+		{
+			name:    "private (RFC1918) => 172.16.0.0",
+			args:    args{namedIfRE: "eth0"},
+			want:    "172.16.0.0",
+			wantErr: false,
+		},
+		{
+			name:    "dummy (RFC3927) => 169.254.0.0",
+			args:    args{namedIfRE: "dummy"},
+			want:    "169.254.0.0",
+			wantErr: false,
+		},
+		{
+			name:    "dummyv6 (RFC4291) IPv6 => fe80::",
+			args:    args{namedIfRE: "dummyv6"},
+			want:    "fe80::",
+			wantErr: false,
+		},
+	}
+
+	// setting up a "fake environment" by temporarily controlling what's returned by
+	// `sockaddr.GetAllInterfaces`
+	realGetAllInterfaces := sockaddr.GetAllInterfaces
+	defer func() { sockaddr.GetAllInterfaces = realGetAllInterfaces }()
+
+	sockaddr.GetAllInterfaces = func() (sockaddr.IfAddrs, error) {
+		return ifAddrs, nil
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := sockaddr.GetInterfaceIPWithoutInterfaceFlags(tt.args.namedIfRE)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetInterfaceIPWithoutInterfaceFlags() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("GetInterfaceIPWithoutInterfaceFlags() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
 
