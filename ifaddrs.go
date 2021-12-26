@@ -236,42 +236,18 @@ func IfAttrs(selectorName string, ifAddrs IfAddrs) (string, error) {
 	return attrVal, err
 }
 
-// GetAllInterfaces proxies the reference to getAllInterfaces in order to
-// allow stubbing in tests by temporarily swapping implementations.
-var GetAllInterfaces = getAllInterfaces
+// NetworkInterfacesProvider abstracts the way we gather network interfaces in order
+// to improve testability
+type NetworkInterfacesProvider interface {
+	GetAllInterfaces() (IfAddrs, error)
+}
 
-// getAllInterfaces iterates over all available network interfaces and finds all
-// available IP addresses on each interface and converts them to
-// sockaddr.IPAddrs, and returning the result as an array of IfAddr.
-func getAllInterfaces() (IfAddrs, error) {
-	ifs, err := net.Interfaces()
-	if err != nil {
-		return nil, err
-	}
+// NetProvider implements NetworkInterfacesProvider and is defined here with its default
+var NetProvider NetworkInterfacesProvider = &OSNetProvider{}
 
-	ifAddrs := make(IfAddrs, 0, len(ifs))
-	for _, intf := range ifs {
-		addrs, err := intf.Addrs()
-		if err != nil {
-			return nil, err
-		}
-
-		for _, addr := range addrs {
-			var ipAddr IPAddr
-			ipAddr, err = NewIPAddr(addr.String())
-			if err != nil {
-				return IfAddrs{}, fmt.Errorf("unable to create an IP address from %q", addr.String())
-			}
-
-			ifAddr := IfAddr{
-				SockAddr:  ipAddr,
-				Interface: intf,
-			}
-			ifAddrs = append(ifAddrs, ifAddr)
-		}
-	}
-
-	return ifAddrs, nil
+// GetAllInterfaces proxies the call to the NetProvider
+func GetAllInterfaces() (IfAddrs, error) {
+	return NetProvider.GetAllInterfaces()
 }
 
 // GetDefaultInterfaces returns IfAddrs of the addresses attached to the default
