@@ -27,6 +27,16 @@ func NewUnixSock(s string) (ret UnixSock, err error) {
 	return ret, nil
 }
 
+// Contains returns true of sa and us have the same path
+func (us UnixSock) Contains(sa SockAddr) bool {
+	usb, ok := sa.(UnixSock)
+	if !ok {
+		return false
+	}
+
+	return usb.path == us.path
+}
+
 // CmpAddress follows the Cmp() standard protocol and returns:
 //
 // - -1 If the receiver should sort first because its name lexically sorts before arg
