@@ -119,10 +119,9 @@ func TestGetPublicIPs(t *testing.T) {
 
 func TestGetInterfaceIP(t *testing.T) {
 
-	// setting up a "fake environment" by temporarily controlling what's returned by
-	// `sockaddr.GetAllInterfaces`
-	teardown := overrideOsNetProvider(&fakeNetProvider{})
-	defer teardown()
+	orig := sockaddr.GetAllInterfaces
+	sockaddr.GetAllInterfaces = mockGetAllInterfaces()
+	t.Cleanup(func() { sockaddr.GetAllInterfaces = orig })
 
 	type args struct {
 		namedIfRE string
@@ -175,10 +174,9 @@ func TestGetInterfaceIP(t *testing.T) {
 
 func TestGetInterfaceIPWithoutInterfaceFlags(t *testing.T) {
 
-	// setting up a "fake environment" by temporarily controlling what's returned by
-	// `sockaddr.GetAllInterfaces`
-	teardown := overrideOsNetProvider(&fakeNetProvider{})
-	defer teardown()
+	orig := sockaddr.GetAllInterfaces
+	sockaddr.GetAllInterfaces = mockGetAllInterfaces()
+	t.Cleanup(func() { sockaddr.GetAllInterfaces = orig })
 
 	type args struct {
 		namedIfRE string
@@ -694,60 +692,50 @@ func TestIfAddrMath(t *testing.T) {
 	}
 }
 
-// overrideOsNetProvider allows overriding the sockaddr.NetProvider
-//
-// It returns a cleanup/teardown func that restores the default OSNetProvider after use
-//
-// Usage:
-// teardown := overrideOsNetProvider(fakeNetProvider{})
-// defer teardown()
-func overrideOsNetProvider(override sockaddr.NetworkInterfacesProvider) func() {
-	sockaddr.NetProvider = override
-	return func() {
-		sockaddr.NetProvider = &sockaddr.OSNetProvider{}
+// mockGetAllInterfaces returns a mocked implementation of an otherwise OS provided
+// sockaddr.GetAllInterfaces()
+// Currently it returns a func so that it could be easily parametrized in order to support
+// additional scenarios selectable by adding an argument and the relevant switch logic below
+func mockGetAllInterfaces() func() (sockaddr.IfAddrs, error) {
+	return func() (sockaddr.IfAddrs, error) {
+		ifAddrs := sockaddr.IfAddrs{
+			{
+				SockAddr: sockaddr.MustIPv4Addr("127.0.0.0/8"),
+				Interface: net.Interface{
+					Index: 1,
+					MTU:   65536,
+					Name:  "lo",
+					Flags: net.FlagUp | net.FlagLoopback,
+				},
+			},
+			{
+				SockAddr: sockaddr.MustIPv4Addr("172.16.0.0/12"),
+				Interface: net.Interface{
+					Index: 2,
+					MTU:   1500,
+					Name:  "eth0",
+					Flags: net.FlagUp,
+				},
+			},
+			{
+				SockAddr: sockaddr.MustIPv4Addr("169.254.0.0/16"),
+				Interface: net.Interface{
+					Index: 3,
+					MTU:   1500,
+					Name:  "dummy",
+					Flags: net.FlagBroadcast,
+				},
+			},
+			{
+				SockAddr: sockaddr.MustIPv6Addr("fe80::/10"),
+				Interface: net.Interface{
+					Index: 3,
+					MTU:   1500,
+					Name:  "dummyv6",
+					Flags: net.FlagBroadcast,
+				},
+			},
+		}
+		return ifAddrs, nil
 	}
-}
-
-type fakeNetProvider struct{}
-
-func (n *fakeNetProvider) GetAllInterfaces() (sockaddr.IfAddrs, error) {
-	ifAddrs := sockaddr.IfAddrs{
-		{
-			SockAddr: sockaddr.MustIPv4Addr("127.0.0.0/8"),
-			Interface: net.Interface{
-				Index: 1,
-				MTU:   65536,
-				Name:  "lo",
-				Flags: net.FlagUp | net.FlagLoopback,
-			},
-		},
-		{
-			SockAddr: sockaddr.MustIPv4Addr("172.16.0.0/12"),
-			Interface: net.Interface{
-				Index: 2,
-				MTU:   1500,
-				Name:  "eth0",
-				Flags: net.FlagUp,
-			},
-		},
-		{
-			SockAddr: sockaddr.MustIPv4Addr("169.254.0.0/16"),
-			Interface: net.Interface{
-				Index: 3,
-				MTU:   1500,
-				Name:  "dummy",
-				Flags: net.FlagBroadcast,
-			},
-		},
-		{
-			SockAddr: sockaddr.MustIPv6Addr("fe80::/10"),
-			Interface: net.Interface{
-				Index: 3,
-				MTU:   1500,
-				Name:  "dummyv6",
-				Flags: net.FlagBroadcast,
-			},
-		},
-	}
-	return ifAddrs, nil
 }
