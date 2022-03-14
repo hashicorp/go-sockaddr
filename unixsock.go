@@ -27,7 +27,7 @@ func NewUnixSock(s string) (ret UnixSock, err error) {
 	return ret, nil
 }
 
-// Contains returns true of sa and us have the same path
+// Contains returns true if sa and us have the same path
 func (us UnixSock) Contains(sa SockAddr) bool {
 	usb, ok := sa.(UnixSock)
 	if !ok {
