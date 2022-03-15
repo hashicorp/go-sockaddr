@@ -51,6 +51,9 @@ func (us UnixSock) CmpAddress(sa SockAddr) int {
 	return strings.Compare(us.Path(), usb.Path())
 }
 
+// CmpRFC doesn't make sense for a Unix socket, so just return defer decision
+func (us UnixSock) CmpRFC(rfcNum uint, sa SockAddr) int { return sortDeferDecision }
+
 // DialPacketArgs returns the arguments required to be passed to net.DialUnix()
 // with the `unixgram` network type.
 func (us UnixSock) DialPacketArgs() (network, dialArgs string) {
