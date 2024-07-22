@@ -1,4 +1,7 @@
 #!/bin/sh --
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 
 exec 2>&1
 # This should succeed because it is a mapped address

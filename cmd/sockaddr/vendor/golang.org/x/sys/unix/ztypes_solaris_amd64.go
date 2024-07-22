@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // +build amd64,solaris
 // Created by cgo -godefs - DO NOT EDIT
 // cgo -godefs types_solaris.go | go run mkpost.go
