@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // +build ppc64le,linux
 // Created by cgo -godefs - DO NOT EDIT
 // cgo -godefs types_linux.go

@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // +build s390x,linux
 // Created by cgo -godefs - DO NOT EDIT
 // cgo -godefs -- -fsigned-char types_linux.go
