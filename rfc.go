@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package sockaddr
 
 // ForwardingBlacklist is a faux RFC that includes a list of non-forwardable IP
