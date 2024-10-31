@@ -1,4 +1,5 @@
 // +build zos
+
 package sockaddr
 
 import (
@@ -10,6 +11,9 @@ import (
 
 var defaultRouteRE *regexp.Regexp = regexp.MustCompile(`^Default +([0-9\.\:]+) +([^ ]+) +([0-9]+) +([^ ]+)`)
 
+func NewRouteInfo() (routeInfo, error) {
+	return routeInfo{}, nil
+}
 
 // zosGetDefaultInterfaceName executes the onetstat command and returns its output
 func zosGetDefaultInterfaceName() (string, error) {
@@ -21,7 +25,7 @@ func zosGetDefaultInterfaceName() (string, error) {
 }
 
 // zosProcessOneStatOutput processes the output of onetstat -r and returns the default interface name
-func zosProcessOneStatOutput(output string) (string, error) {
+func zosProcessOnetstatOutput(output string) (string, error) {
 	linesout := strings.Split(output, "\n")
 	for _, line := range linesout {
 		result := defaultRouteRE.FindStringSubmatch(line)
@@ -38,5 +42,5 @@ func (ri routeInfo) GetDefaultInterfaceName() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return zosProcessOneStatOutput(output)
+	return zosProcessOnetstatOutput(output)
 }
