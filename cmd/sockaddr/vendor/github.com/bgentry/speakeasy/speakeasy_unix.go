@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // based on https://code.google.com/p/gopass
 // Author: johnsiilver@gmail.com (John Doak)
 //
