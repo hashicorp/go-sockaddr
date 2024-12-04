@@ -67,9 +67,13 @@ func (s SortIPAddrsByNetworkSize) Less(i, j int) bool {
 	// that have a port (e.g. a host with a /32 and port number is more
 	// specific and should sort first over a host with a /32 but no port
 	// set).
-	if s.IPAddrs[i].IPPort() == 0 || s.IPAddrs[j].IPPort() == 0 {
+	if s.IPAddrs[i].IPPort() == 0 && s.IPAddrs[j].IPPort() != 0 {
 		return false
 	}
+	if s.IPAddrs[i].IPPort() != 0 && s.IPAddrs[j].IPPort() == 0 {
+		return true
+	}
+
 	return s.IPAddrs[i].IPPort() < s.IPAddrs[j].IPPort()
 }
 
