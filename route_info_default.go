@@ -1,5 +1,5 @@
-//go:build nacl || plan9 || js
-// +build nacl plan9 js
+//go:build nacl || plan9 || js || wasip1
+// +build nacl plan9 js wasip1
 
 package sockaddr
 
