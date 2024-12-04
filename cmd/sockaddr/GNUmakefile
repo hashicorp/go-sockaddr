@@ -1,5 +1,6 @@
 BIN:=sockaddr
 SRCS:=$(shell find . -name '*.go' ! -path '*/vendor/*')
+GOPATH:=$(shell go env GOPATH)
 
 .DEFAULT_GOAL := dev
 
