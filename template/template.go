@@ -95,6 +95,9 @@ func init() {
 		// the largest network size.
 		"GetInterfaceIP": sockaddr.GetInterfaceIP,
 
+		// Returns the first IP address of the named interfaces, regardless of any interface flag
+		"GetInterfaceIPWithoutInterfaceFlags": sockaddr.GetInterfaceIPWithoutInterfaceFlags,
+
 		// Return all IP addresses on the named interface, sorted by the largest
 		// network size.
 		"GetInterfaceIPs": sockaddr.GetInterfaceIPs,
