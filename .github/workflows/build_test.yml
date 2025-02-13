@@ -7,14 +7,23 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
-
+        strategy:
+          fail-fast: false
+          max-parallel: 30
+          matrix:
+            version:
+              - '1.19'
+              - '1.20'
+              - '1.21'
+              - '1.22'
+              - '1.23'
         steps:
             - name: Checkout Code
               uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
             - name: Setup Go
               uses: actions/setup-go@3041bf56c941b39c61721a86cd11f3bb1338122a
               with:
-                go-version: '1.19'
+                go-version: ${{ matrix.version }}
             - name: Test Go
               run: go test -v ./...
             - name: Build Go

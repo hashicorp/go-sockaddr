@@ -8,7 +8,8 @@ import (
 	socktmpl "github.com/hashicorp/go-sockaddr/template"
 )
 
-func getInputList() []sockaddr.IfAddr {
+func TestSockAddr_Parse(t *testing.T) {
+
 	interfaceList := []struct {
 		SockAddress string
 		Interface   net.Interface
@@ -163,11 +164,6 @@ func getInputList() []sockaddr.IfAddr {
 		})
 	}
 
-	return inputList
-}
-
-func TestSockAddr_Parse(t *testing.T) {
-
 	tests := []struct {
 		name          string
 		input         string
@@ -186,11 +182,6 @@ func TestSockAddr_Parse(t *testing.T) {
 			output: ``,
 			fail:   true,
 		},
-		// {
-		// 	name:   "GetDefaultInterface",
-		// 	input:  `{{GetDefaultInterfaces | include "type" "IPv4" | attr "name" }}`,
-		// 	output: `en0`,
-		// },
 		{
 			name:   `include "name" regexp`,
 			input:  `{{. | include "name" "^(en|lo)0$" | exclude "name" "^en0$" | sort "type" | sort "address" | join "address" " " }}`,
@@ -328,20 +319,6 @@ func TestSockAddr_Parse(t *testing.T) {
 			input:  `{{. | include "name" "lo0" | include "flag" "up" | sort "-type,+address" | attr "address" }}`,
 			output: `::1`,
 		},
-		// 		{
-		// 			// NOTE(sean@): This is the HashiCorp default in 2016.
-		// 			// Indented for effect.  Using "true" as the output
-		// 			// instead of printing the correct $rfc*Addrs values.
-		// 			name: "HashiCorpDefault2016",
-		// 			input: `
-		// {{- with $addr := . | include "type" "IP" | include "rfc" "1918|6598" | sort "address" | attr "address" -}}
-
-		//   {{- if ($addr | len) gt 0 -}}
-		//     {{- print "true" -}}{{/* print $addr*/ -}}
-		//   {{- end -}}
-		// {{- end -}}`,
-		// 			output: `true`,
-		// 		},
 		{
 			name:   "math address +",
 			input:  `{{. | include "name" "^lo0$" | include "type" "IP" | math "address" "+2" | sort "+type,+address" | join "address" " " }}`,
@@ -397,26 +374,6 @@ func TestSockAddr_Parse(t *testing.T) {
 			input:  `{{. | include "name" "^lo0$" | include "type" "IP" | sort "+type,+address" | math "network" "-4278190088" | join "address" " " }}`,
 			output: `127.255.255.248 ::1 fe80::ffff:ffff:ff:fff8`,
 		},
-		// {
-		// 	// Assume the private IPs available on the host are: 10.1.2.3
-		// 	// fe80::1025:f732:1001:203
-		// 	name:   "GetPrivateIPs",
-		// 	input:  `{{GetPrivateIPs}}`,
-		// 	output: `10.1.2.3 fe80::1025:f732:1001:203`,
-		// },
-		// {
-		// 	// Assume the public IPs available on the host are: 1.2.3.4 6.7.8.9
-		// 	name:   "GetPublicIPs",
-		// 	input:  `{{GetPublicIPs}}`,
-		// 	output: `1.2.3.4 6.7.8.9`,
-		// },
-		// {
-		// 	// Assume the private IPs on this host are just the IPv4 addresses:
-		// 	// 10.1.2.3 and 172.16.4.6
-		// 	name:   "GetInterfaceIPs",
-		// 	input:  `{{GetInterfaceIPs "en0"}}`,
-		// 	output: `10.1.2.3 and 172.16.4.6`,
-		// },
 	}
 
 	for i, test := range tests {
@@ -426,7 +383,7 @@ func TestSockAddr_Parse(t *testing.T) {
 		}
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
-			out, err := socktmpl.ParseIfAddrs(test.input, getInputList())
+			out, err := socktmpl.ParseIfAddrs(test.input, inputList)
 			if err != nil && !test.fail {
 				t.Fatalf("%q: bad: %v", test.name, err)
 			}

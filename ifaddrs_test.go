@@ -5,6 +5,7 @@ import (
 	"net"
 	"reflect"
 	"runtime"
+	"strings"
 	"testing"
 
 	sockaddr "github.com/hashicorp/go-sockaddr"
@@ -632,7 +633,7 @@ func TestGetIfAddrs(t *testing.T) {
 		t.Fatalf("No loopback interfaces found, loInt nil")
 	}
 
-	if val := sockaddr.IfAddrAttr(*loInt, "flags"); !(val == "up|loopback|multicast" || val == "up|loopback") {
+	if val := sockaddr.IfAddrAttr(*loInt, "flags"); !strings.Contains(val, "up|loopback") {
 		t.Fatalf("expected different flags from loopback: %q", val)
 	}
 
