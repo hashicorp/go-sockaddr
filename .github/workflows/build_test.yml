@@ -12,11 +12,8 @@ jobs:
           max-parallel: 30
           matrix:
             version:
-              - '1.19'
-              - '1.20'
-              - '1.21'
-              - '1.22'
-              - '1.23'
+              - 'oldstable'
+              - 'stable'
         steps:
             - name: Checkout Code
               uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
