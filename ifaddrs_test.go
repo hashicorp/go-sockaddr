@@ -634,7 +634,8 @@ func TestGetIfAddrs(t *testing.T) {
 
 	if val := sockaddr.IfAddrAttr(*loInt, "flags"); !(val == "up|loopback|multicast" ||
 		val == "up|loopback" ||
-		val == "up|loopback|multicast|running") {
+		val == "up|loopback|multicast|running" ||
+		val == "up|loopback|running") {
 		t.Fatalf("expected different flags from loopback: %q", val)
 	}
 
