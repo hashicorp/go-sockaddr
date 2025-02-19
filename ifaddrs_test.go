@@ -632,7 +632,10 @@ func TestGetIfAddrs(t *testing.T) {
 		t.Fatalf("No loopback interfaces found, loInt nil")
 	}
 
-	if val := sockaddr.IfAddrAttr(*loInt, "flags"); !(val == "up|loopback|multicast" || val == "up|loopback") {
+	if val := sockaddr.IfAddrAttr(*loInt, "flags"); !(val == "up|loopback|multicast" ||
+		val == "up|loopback" ||
+		val == "up|loopback|multicast|running" ||
+		val == "up|loopback|running") {
 		t.Fatalf("expected different flags from loopback: %q", val)
 	}
 

@@ -1,6 +1,6 @@
 module github.com/hashicorp/go-sockaddr
 
-go 1.19
+go 1.23
 
 require (
 	github.com/hashicorp/errwrap v1.1.0
@@ -27,6 +27,6 @@ require (
 	github.com/posener/complete v1.1.1 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
-	golang.org/x/crypto v0.17.0 // indirect
-	golang.org/x/sys v0.22.0 // indirect
+	golang.org/x/crypto v0.32.0 // indirect
+	golang.org/x/sys v0.29.0 // indirect
 )

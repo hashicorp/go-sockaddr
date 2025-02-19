@@ -1,12 +1,169 @@
 package template_test
 
 import (
+	"net"
 	"testing"
 
+	sockaddr "github.com/hashicorp/go-sockaddr"
 	socktmpl "github.com/hashicorp/go-sockaddr/template"
 )
 
 func TestSockAddr_Parse(t *testing.T) {
+
+	interfaceList := []struct {
+		SockAddress string
+		Interface   net.Interface
+	}{
+		{
+			SockAddress: "127.0.0.1/8",
+			Interface: net.Interface{
+				Index:        1,
+				MTU:          16384,
+				Name:         "lo0",
+				HardwareAddr: []byte{},
+				Flags:        net.FlagUp | net.FlagLoopback | net.FlagMulticast,
+			},
+		},
+		{
+			SockAddress: "::1/128",
+			Interface: net.Interface{
+				Index:        1,
+				MTU:          16384,
+				Name:         "lo0",
+				HardwareAddr: []byte{},
+				Flags:        net.FlagUp | net.FlagLoopback | net.FlagMulticast,
+			},
+		},
+		{
+			SockAddress: "fe80::1/64",
+			Interface: net.Interface{
+				Index:        1,
+				MTU:          16384,
+				Name:         "lo0",
+				HardwareAddr: []byte{},
+				Flags:        net.FlagUp | net.FlagLoopback | net.FlagMulticast,
+			},
+		},
+		{
+			SockAddress: "fe80::603e:5fff:fe48:75ff/64",
+			Interface: net.Interface{
+				Index:        14,
+				MTU:          1500,
+				Name:         "ap1",
+				HardwareAddr: []byte{0x62, 0x3e, 0x5f, 0x48, 0x75, 0xff},
+				Flags:        net.FlagUp | net.FlagBroadcast | net.FlagMulticast,
+			},
+		},
+		{
+			SockAddress: "fe80::2b:112f:ce21:7b6f/64",
+			Interface: net.Interface{
+				Index:        15,
+				MTU:          1500,
+				Name:         "en0",
+				HardwareAddr: []byte{0x60, 0x3e, 0x5f, 0x48, 0x75, 0xff},
+				Flags:        net.FlagUp | net.FlagBroadcast | net.FlagMulticast,
+			},
+		},
+		{
+			SockAddress: "2406:7400:63:ef5:1415:8bc3:fa5e:2578/64",
+			Interface: net.Interface{
+				Index:        15,
+				MTU:          1500,
+				Name:         "en0",
+				HardwareAddr: []byte{0x60, 0x3e, 0x5f, 0x48, 0x75, 0xff},
+				Flags:        net.FlagUp | net.FlagBroadcast | net.FlagMulticast,
+			},
+		},
+		{
+			SockAddress: "2406:7400:63:ef5:3c37:71a6:e3b4:b565/64",
+			Interface: net.Interface{
+				Index:        15,
+				MTU:          1500,
+				Name:         "en0",
+				HardwareAddr: []byte{0x60, 0x3e, 0x5f, 0x48, 0x75, 0xff},
+				Flags:        net.FlagUp | net.FlagBroadcast | net.FlagMulticast,
+			},
+		},
+		{
+			SockAddress: "192.168.0.102/24",
+			Interface: net.Interface{
+				Index:        15,
+				MTU:          1500,
+				Name:         "en0",
+				HardwareAddr: []byte{0x60, 0x3e, 0x5f, 0x48, 0x75, 0xff},
+				Flags:        net.FlagUp | net.FlagBroadcast | net.FlagMulticast,
+			},
+		},
+		{
+			SockAddress: "fe80::3871:85ff:fed8:aadc/64",
+			Interface: net.Interface{
+				Index:        16,
+				MTU:          1500,
+				Name:         "awdl0",
+				HardwareAddr: []byte{0x3a, 0x71, 0x85, 0xd8, 0xaa, 0xdc},
+				Flags:        net.FlagUp | net.FlagBroadcast | net.FlagMulticast,
+			},
+		},
+		{
+			SockAddress: "fe80::3871:85ff:fed8:aadc/64",
+			Interface: net.Interface{
+				Index:        17,
+				MTU:          1500,
+				Name:         "llw0",
+				HardwareAddr: []byte{0x3a, 0x71, 0x85, 0xd8, 0xaa, 0xdc},
+				Flags:        net.FlagUp | net.FlagBroadcast | net.FlagMulticast,
+			},
+		},
+		{
+			SockAddress: "fe80::83f9:d7fb:f204:cee5/64",
+			Interface: net.Interface{
+				Index:        18,
+				MTU:          1500,
+				Name:         "utun0",
+				HardwareAddr: nil,
+				Flags:        net.FlagUp | net.FlagPointToPoint | net.FlagMulticast,
+			},
+		},
+		{
+			SockAddress: "fe80::2023:8d30:551e:18d/64",
+			Interface: net.Interface{
+				Index:        19,
+				MTU:          1380,
+				Name:         "utun1",
+				HardwareAddr: nil,
+				Flags:        net.FlagUp | net.FlagPointToPoint | net.FlagMulticast,
+			},
+		},
+		{
+			SockAddress: "fe80::f9c1:463:96e6:fa8a/64",
+			Interface: net.Interface{
+				Index:        20,
+				MTU:          2000,
+				Name:         "utun2",
+				HardwareAddr: nil,
+				Flags:        net.FlagUp | net.FlagPointToPoint | net.FlagMulticast,
+			},
+		},
+		{
+			SockAddress: "fe80::ce81:b1c:bd2c:69e/64",
+			Interface: net.Interface{
+				Index:        21,
+				MTU:          1000,
+				Name:         "utun3",
+				HardwareAddr: nil,
+				Flags:        net.FlagUp | net.FlagPointToPoint | net.FlagMulticast,
+			},
+		},
+	}
+	inputList := []sockaddr.IfAddr{}
+	for i := range interfaceList {
+		sockAddr, _ := sockaddr.NewIPAddr(interfaceList[i].SockAddress)
+		inputList = append(inputList, sockaddr.IfAddr{
+			SockAddr:  sockAddr,
+			Interface: interfaceList[i].Interface,
+		})
+	}
+
 	tests := []struct {
 		name          string
 		input         string
@@ -16,7 +173,7 @@ func TestSockAddr_Parse(t *testing.T) {
 	}{
 		{
 			name:   `basic include "name"`,
-			input:  `{{GetAllInterfaces | include "name" "lo0" | printf "%v"}}`,
+			input:  `{{. | include "name" "lo0" | printf "%v"}}`,
 			output: `[127.0.0.1/8 {1 16384 lo0  up|loopback|multicast} ::1 {1 16384 lo0  up|loopback|multicast} fe80::1/64 {1 16384 lo0  up|loopback|multicast}]`,
 		},
 		{
@@ -26,13 +183,8 @@ func TestSockAddr_Parse(t *testing.T) {
 			fail:   true,
 		},
 		{
-			name:   "GetDefaultInterface",
-			input:  `{{GetDefaultInterfaces | include "type" "IPv4" | attr "name" }}`,
-			output: `en0`,
-		},
-		{
 			name:   `include "name" regexp`,
-			input:  `{{GetAllInterfaces | include "name" "^(en|lo)0$" | exclude "name" "^en0$" | sort "type" | sort "address" | join "address" " " }}`,
+			input:  `{{. | include "name" "^(en|lo)0$" | exclude "name" "^en0$" | sort "type" | sort "address" | join "address" " " }}`,
 			output: `127.0.0.1 ::1 fe80::1`,
 		},
 		{
@@ -168,45 +320,31 @@ func TestSockAddr_Parse(t *testing.T) {
 			output: `::1`,
 		},
 		{
-			// NOTE(sean@): This is the HashiCorp default in 2016.
-			// Indented for effect.  Using "true" as the output
-			// instead of printing the correct $rfc*Addrs values.
-			name: "HashiCorpDefault2016",
-			input: `
-{{- with $addr := GetAllInterfaces | include "type" "IP" | include "rfc" "1918|6598" | sort "address" | attr "address" -}}
-
-  {{- if ($addr | len) gt 0 -}}
-    {{- print "true" -}}{{/* print $addr*/ -}}
-  {{- end -}}
-{{- end -}}`,
-			output: `true`,
-		},
-		{
 			name:   "math address +",
-			input:  `{{GetAllInterfaces | include "name" "^lo0$" | include "type" "IP" | math "address" "+2" | sort "+type,+address" | join "address" " " }}`,
+			input:  `{{. | include "name" "^lo0$" | include "type" "IP" | math "address" "+2" | sort "+type,+address" | join "address" " " }}`,
 			output: `127.0.0.3 ::3 fe80::3`,
 		},
 		{
 			name: "math address + overflow",
-			input: `|{{- with $ifAddrs := GetAllInterfaces | include "name" "^lo0$" | include "type" "IP" | math "address" "+16777217" | sort "+type,+address" -}}
-  {{- range $ifAddrs -}}
-    {{- attr "address" . }} -- {{ attr "network" . }}/{{ attr "size" . }}|{{ end -}}
-{{- end -}}`,
+			input: `|{{- with $ifAddrs := . | include "name" "^lo0$" | include "type" "IP" | math "address" "+16777217" | sort "+type,+address" -}}
+		  {{- range $ifAddrs -}}
+		    {{- attr "address" . }} -- {{ attr "network" . }}/{{ attr "size" . }}|{{ end -}}
+		{{- end -}}`,
 			output: `|128.0.0.2 -- 128.0.0.0/16777216|::100:2 -- ::100:2/1|fe80::100:2 -- fe80::/18446744073709551616|`,
 		},
 		{
 			name:   "math address + overflow+wrap",
-			input:  `{{GetAllInterfaces | include "name" "^lo0$" | include "type" "IP" | math "address" "+4294967294" | sort "+type,+address" | join "address" " " }}`,
+			input:  `{{. | include "name" "^lo0$" | include "type" "IP" | math "address" "+4294967294" | sort "+type,+address" | join "address" " " }}`,
 			output: `126.255.255.255 ::ffff:ffff fe80::ffff:ffff`,
 		},
 		{
 			name:   "math address -",
-			input:  `{{GetAllInterfaces | include "name" "^lo0$" | include "type" "IP" | math "address" "-256" | sort "+type,+address" | join "address" " " }}`,
+			input:  `{{. | include "name" "^lo0$" | include "type" "IP" | math "address" "-256" | sort "+type,+address" | join "address" " " }}`,
 			output: `126.255.255.1 fe7f:ffff:ffff:ffff:ffff:ffff:ffff:ff01 ffff:ffff:ffff:ffff:ffff:ffff:ffff:ff01`,
 		},
 		{
 			name:   "math address - underflow",
-			input:  `{{GetAllInterfaces | include "name" "^lo0$" | include "type" "IP" | math "address" "-4278190082" | sort "+type,+address" | join "address" " " }}`,
+			input:  `{{. | include "name" "^lo0$" | include "type" "IP" | math "address" "-4278190082" | sort "+type,+address" | join "address" " " }}`,
 			output: `127.255.255.255 fe7f:ffff:ffff:ffff:ffff:ffff:ff:ffff ffff:ffff:ffff:ffff:ffff:ffff:ff:ffff`,
 		},
 		{
@@ -214,18 +352,18 @@ func TestSockAddr_Parse(t *testing.T) {
 			// /128 which means its value never changes and this is expected.  lo0's
 			// site-local address has a /64 address and is expected to change.
 			name:   "math network",
-			input:  `{{GetAllInterfaces | include "name" "^lo0$" | include "type" "IP" | math "network" "+2" | sort "+type,+address" | join "address" " " }}`,
+			input:  `{{. | include "name" "^lo0$" | include "type" "IP" | math "network" "+2" | sort "+type,+address" | join "address" " " }}`,
 			output: `127.0.0.2 ::1 fe80::2`,
 		},
 		{
 			// Assume an IPv4 input of 127.0.0.1.  With a value of 0xff00ff01, we wrap once on purpose.
 			name:   "math network + wrap",
-			input:  `{{GetAllInterfaces | include "name" "^lo0$" | include "type" "IP" | math "network" "+4278255368" | sort "+type,+address" | join "address" " " }}`,
+			input:  `{{. | include "name" "^lo0$" | include "type" "IP" | math "network" "+4278255368" | sort "+type,+address" | join "address" " " }}`,
 			output: `127.0.255.8 ::1 fe80::ff00:ff08`,
 		},
 		{
 			name:   "math network -",
-			input:  `{{GetAllInterfaces | include "name" "^lo0$" | include "type" "IP" | math "network" "-2" | sort "+type,+address" | join "address" " " }}`,
+			input:  `{{. | include "name" "^lo0$" | include "type" "IP" | math "network" "-2" | sort "+type,+address" | join "address" " " }}`,
 			output: `127.255.255.254 ::1 fe80::ffff:ffff:ffff:fffe`,
 		},
 		{
@@ -233,28 +371,8 @@ func TestSockAddr_Parse(t *testing.T) {
 			// should wrap and underflow by 8.  Assume an IPv6 input of ::1.  With a
 			// value of -0xff000008 the value underflows and wraps.
 			name:   "math network - underflow+wrap",
-			input:  `{{GetAllInterfaces | include "name" "^lo0$" | include "type" "IP" | sort "+type,+address" | math "network" "-4278190088" | join "address" " " }}`,
+			input:  `{{. | include "name" "^lo0$" | include "type" "IP" | sort "+type,+address" | math "network" "-4278190088" | join "address" " " }}`,
 			output: `127.255.255.248 ::1 fe80::ffff:ffff:ff:fff8`,
-		},
-		{
-			// Assume the private IPs available on the host are: 10.1.2.3
-			// fe80::1025:f732:1001:203
-			name:   "GetPrivateIPs",
-			input:  `{{GetPrivateIPs}}`,
-			output: `10.1.2.3 fe80::1025:f732:1001:203`,
-		},
-		{
-			// Assume the public IPs available on the host are: 1.2.3.4 6.7.8.9
-			name:   "GetPublicIPs",
-			input:  `{{GetPublicIPs}}`,
-			output: `1.2.3.4 6.7.8.9`,
-		},
-		{
-			// Assume the private IPs on this host are just the IPv4 addresses:
-			// 10.1.2.3 and 172.16.4.6
-			name:   "GetInterfaceIPs",
-			input:  `{{GetInterfaceIPs "en0"}}`,
-			output: `10.1.2.3 and 172.16.4.6`,
 		},
 	}
 
@@ -265,7 +383,7 @@ func TestSockAddr_Parse(t *testing.T) {
 		}
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
-			out, err := socktmpl.Parse(test.input)
+			out, err := socktmpl.ParseIfAddrs(test.input, inputList)
 			if err != nil && !test.fail {
 				t.Fatalf("%q: bad: %v", test.name, err)
 			}
