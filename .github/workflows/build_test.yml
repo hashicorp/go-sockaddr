@@ -1,8 +1,8 @@
 name: Build and Test Workflow
 
 on:
-    pull_request:
-        branches: [ "master" ]
+    push:
+        branches: [ "coverage" ]
 
 jobs:
     build:
@@ -22,6 +22,14 @@ jobs:
               with:
                 go-version: ${{ matrix.version }}
             - name: Test Go
-              run: go test -v ./...
+              run: go test -v -coverprofile=coverage.out ./...
             - name: Build Go
               run: go build ./...
+            - name: Upload coverage report
+              uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808
+              with: 
+                path: coverage.out
+                name: coverage-report
+            - name: Display coverage report
+              run: go tool cover -func=coverage.out
+              
