@@ -88,7 +88,6 @@ func (ms *multiIfAddrSorter) Less(i, j int) bool {
 	default:
 		// Still a tie! Now what?
 		return false
-		panic("undefined sort order for remaining items in the list")
 	}
 }
 
@@ -287,6 +286,9 @@ func GetDefaultInterfaces() (IfAddrs, error) {
 
 	var defaultIfs, ifAddrs IfAddrs
 	ifAddrs, err = GetAllInterfaces()
+	if err != nil {
+		return IfAddrs{}, err
+	}
 	for _, ifAddr := range ifAddrs {
 		if ifAddr.Name == defaultIfName {
 			defaultIfs = append(defaultIfs, ifAddr)
@@ -303,7 +305,7 @@ func GetDefaultInterfaces() (IfAddrs, error) {
 //
 // ```
 // $ sockaddr eval -r '{{GetAllInterfaces | include "type" "ip" | include "flags" "forwardable" | include "flags" "up" | sort "default,type,size" | include "RFC" "6890" }}'
-/// ```
+// / ```
 func GetPrivateInterfaces() (IfAddrs, error) {
 	privateIfs, err := GetAllInterfaces()
 	if err != nil {
@@ -351,7 +353,7 @@ func GetPrivateInterfaces() (IfAddrs, error) {
 //
 // ```
 // $ sockaddr eval -r '{{GetAllInterfaces | include "type" "ip" | include "flags" "forwardable" | include "flags" "up" | sort "default,type,size" | exclude "RFC" "6890" }}'
-/// ```
+// / ```
 func GetPublicInterfaces() (IfAddrs, error) {
 	publicIfs, err := GetAllInterfaces()
 	if err != nil {
@@ -727,7 +729,6 @@ func IfByNetwork(selectorParam string, inputIfAddrs IfAddrs) (IfAddrs, IfAddrs, 
 func IfAddrMath(operation, value string, inputIfAddr IfAddr) (IfAddr, error) {
 	// Regexp used to enforce the sign being a required part of the grammar for
 	// some values.
-	signRe := signRE.Copy()
 
 	switch strings.ToLower(operation) {
 	case "address":
@@ -735,7 +736,7 @@ func IfAddrMath(operation, value string, inputIfAddr IfAddr) (IfAddr, error) {
 		// underflow networks, however it will wrap along the underlying address's
 		// underlying type.
 
-		if !signRe.MatchString(value) {
+		if !signRE.MatchString(value) {
 			return IfAddr{}, fmt.Errorf("sign (+/-) is required for operation %q", operation)
 		}
 
@@ -790,7 +791,7 @@ func IfAddrMath(operation, value string, inputIfAddr IfAddr) (IfAddr, error) {
 		// means a "-1" value on a network will be the broadcast address after
 		// wrapping is applied.
 
-		if !signRe.MatchString(value) {
+		if !signRE.MatchString(value) {
 			return IfAddr{}, fmt.Errorf("sign (+/-) is required for operation %q", operation)
 		}
 
@@ -1228,10 +1229,9 @@ func parseDefaultIfNameFromIPCmdAndroid(routeOut string) (string, error) {
 // Linux.
 func parseIfNameFromIPCmd(routeOut string) [][]string {
 	lines := strings.Split(routeOut, "\n")
-	re := whitespaceRE.Copy()
 	parsedLines := make([][]string, 0, len(lines))
 	for _, line := range lines {
-		kvs := re.Split(line, -1)
+		kvs := whitespaceRE.Split(line, -1)
 		if len(kvs) < 5 {
 			continue
 		}
@@ -1273,9 +1273,8 @@ func parseDefaultIfNameWindows(routeOut, ipconfigOut string) (string, error) {
 // compatibility.
 func parseDefaultIPAddrWindowsRoute(routeOut string) (string, error) {
 	lines := strings.Split(routeOut, "\n")
-	re := whitespaceRE.Copy()
 	for _, line := range lines {
-		kvs := re.Split(strings.TrimSpace(line), -1)
+		kvs := whitespaceRE.Split(strings.TrimSpace(line), -1)
 		if len(kvs) < 3 {
 			continue
 		}
@@ -1297,17 +1296,15 @@ func parseDefaultIPAddrWindowsRoute(routeOut string) (string, error) {
 // compatibility
 func parseDefaultIfNameWindowsIPConfig(defaultIPAddr, routeOut string) (string, error) {
 	lines := strings.Split(routeOut, "\n")
-	ifNameRe := ifNameRE.Copy()
-	ipAddrRe := ipAddrRE.Copy()
 	var ifName string
 	for _, line := range lines {
-		switch ifNameMatches := ifNameRe.FindStringSubmatch(line); {
+		switch ifNameMatches := ifNameRE.FindStringSubmatch(line); {
 		case len(ifNameMatches) > 1:
 			ifName = ifNameMatches[1]
 			continue
 		}
 
-		switch ipAddrMatches := ipAddrRe.FindStringSubmatch(line); {
+		switch ipAddrMatches := ipAddrRE.FindStringSubmatch(line); {
 		case len(ipAddrMatches) > 1 && ipAddrMatches[1] == defaultIPAddr:
 			return ifName, nil
 		}

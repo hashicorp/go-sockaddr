@@ -151,6 +151,7 @@ func TestSockAddr_IPAddrs_BySpecificMaskLen(t *testing.T) {
 					t.Fatalf("invalid type")
 				}
 			}
+			fmt.Print(ipv4Addrs) // added to solve the linter staticcheck error SA4010
 
 			ipAddrs := make([]sockaddr.IPAddr, 0, len(filteredAddrs))
 			for _, x := range filteredAddrs {

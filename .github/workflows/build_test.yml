@@ -1,8 +1,8 @@
 name: Build and Test Workflow
 
 on:
-    pull_request:
-        branches: [ "master" ]
+    push:
+        branches: [ "linting" ]
 
 jobs:
     build:
@@ -21,6 +21,8 @@ jobs:
               uses: actions/setup-go@3041bf56c941b39c61721a86cd11f3bb1338122a
               with:
                 go-version: ${{ matrix.version }}
+            - name: Run golangci-lint
+              uses: golangci/golangci-lint-action@08e2f20817b15149a52b5b3ebe7de50aff2ba8c5
             - name: Test Go
               run: go test -v -coverprofile=coverage.out ./...
             - name: Build Go
