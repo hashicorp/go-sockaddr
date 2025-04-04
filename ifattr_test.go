@@ -75,16 +75,19 @@ func testSockAddrAttr(t *testing.T, sai interface{}) {
 			_, err := v.Attr(attrTest.name)
 			switch saType {
 			case sockaddr.TypeIPv4:
+				//nolint:staticcheck // SA9003 Ignoring this for now, not sure why we have an empty if
 				if err == nil && attrTest.ipv4Pass || err != nil && !attrTest.ipv4Pass {
 					// pass
 				}
 				// fallthrough
 			case sockaddr.TypeIPv6:
+				//nolint:staticcheck // SA9003 Ignoring this for now, not sure why we have an empty if
 				if err == nil && attrTest.ipv6Pass || err != nil && !attrTest.ipv6Pass {
 					// pass
 				}
 				// fallthrough
 			case sockaddr.TypeUnix:
+				//nolint:staticcheck // SA9003 Ignoring this for now, not sure why we have an empty if
 				if err == nil && attrTest.unixPass || err != nil && !attrTest.unixPass {
 					// pass
 				}

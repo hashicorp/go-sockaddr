@@ -117,7 +117,7 @@ func (c *EvalCommand) Run(args []string) int {
 			c.Ui.Output(fmt.Sprintf("[%d] in: %q\n[%d] out: %q\n", i, inputs[i], i, out))
 			if i != len(outputs)-1 {
 				if c.debugOutput {
-					c.Ui.Output(fmt.Sprintf("---\n"))
+					c.Ui.Output("---\n")
 				}
 			}
 		}
