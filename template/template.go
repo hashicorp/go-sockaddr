@@ -141,13 +141,13 @@ func ParseIfAddrsTemplate(input string, ifAddrs sockaddr.IfAddrs, tmplIn *templa
 		Funcs(HelperFuncs).
 		Parse(input)
 	if err != nil {
-		return "", fmt.Errorf("%s", fmt.Sprintf("unable to parse template %+q: %w", input, err))
+		return "", fmt.Errorf("%s", fmt.Sprintf("unable to parse template %+q: %v", input, err))
 	}
 
 	var outWriter bytes.Buffer
 	err = tmpl.Execute(&outWriter, ifAddrs)
 	if err != nil {
-		return "", fmt.Errorf("%s", fmt.Sprintf("unable to execute sockaddr input %+q: %w", input, err))
+		return "", fmt.Errorf("%s", fmt.Sprintf("unable to execute sockaddr input %+q: %v", input, err))
 	}
 
 	return outWriter.String(), nil
