@@ -31,13 +31,14 @@ func Attr(sa SockAddr, attrName AttrName) (string, error) {
 			return attrVal, nil
 		}
 
-		if sockType == TypeIPv4 {
+		switch sockType {
+		case TypeIPv4:
 			ipv4 := *ToIPv4Addr(sa)
 			attrVal := IPv4AddrAttr(ipv4, attrName)
 			if attrVal != "" {
 				return attrVal, nil
 			}
-		} else if sockType == TypeIPv6 {
+		case TypeIPv6:
 			ipv6 := *ToIPv6Addr(sa)
 			attrVal := IPv6AddrAttr(ipv6, attrName)
 			if attrVal != "" {

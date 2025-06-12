@@ -162,7 +162,7 @@ func (c *TechSupportCommand) parseOpts(args []string) ([]string, error) {
 		c.outputMode = "md"
 	case "raw":
 	default:
-		return nil, fmt.Errorf(`Invalid output mode %q, supported output types are "md" (default) and "raw"`, c.outputMode)
+		return nil, fmt.Errorf(`invalid output mode %q, supported output types are "md" (default) and "raw"`, c.outputMode)
 	}
 	return c.flags.Args(), nil
 }

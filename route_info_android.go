@@ -5,6 +5,7 @@ package sockaddr
 import (
 	"errors"
 	"os/exec"
+	"strings"
 )
 
 // NewRouteInfo returns a Android-specific implementation of the RouteInfo
@@ -23,10 +24,21 @@ func (ri routeInfo) GetDefaultInterfaceName() (string, error) {
 		return "", err
 	}
 
-
 	var ifName string
 	if ifName, err = parseDefaultIfNameFromIPCmdAndroid(string(out)); err != nil {
 		return "", errors.New("No default interface found")
 	}
 	return ifName, nil
+}
+
+// parseDefaultIfNameFromIPCmdAndroid parses the default interface from ip(8) for
+// Android.
+func parseDefaultIfNameFromIPCmdAndroid(routeOut string) (string, error) {
+	parsedLines := parseIfNameFromIPCmd(routeOut)
+	if len(parsedLines) > 0 {
+		ifName := strings.TrimSpace(parsedLines[0][4])
+		return ifName, nil
+	}
+
+	return "", errors.New("No default interface found")
 }
