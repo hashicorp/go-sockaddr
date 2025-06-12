@@ -21,10 +21,10 @@ func init() {
 func seedMathRand() {
 	n, err := crand.Int(crand.Reader, big.NewInt(math.MaxInt64))
 	if err != nil {
-		rand.Seed(time.Now().UTC().UnixNano())
+		rand.New(rand.NewSource(time.Now().UTC().UnixNano()))
 		return
 	}
-	rand.Seed(n.Int64())
+	rand.New(rand.NewSource(n.Int64()))
 }
 
 // NOTE: A number of these code paths are exercised in template/ and
