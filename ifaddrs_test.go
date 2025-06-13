@@ -632,10 +632,10 @@ func TestGetIfAddrs(t *testing.T) {
 		t.Fatalf("No loopback interfaces found, loInt nil")
 	}
 
-	if val := sockaddr.IfAddrAttr(*loInt, "flags"); !(val == "up|loopback|multicast" ||
-		val == "up|loopback" ||
-		val == "up|loopback|multicast|running" ||
-		val == "up|loopback|running") {
+	if val := sockaddr.IfAddrAttr(*loInt, "flags"); val != "up|loopback|multicast" &&
+		val != "up|loopback" &&
+		val != "up|loopback|multicast|running" &&
+		val != "up|loopback|running" {
 		t.Fatalf("expected different flags from loopback: %q", val)
 	}
 
@@ -783,7 +783,7 @@ func TestGetAllInterfaces(t *testing.T) {
 	}
 
 	for i := initialLen - 1; i >= 0; i-- {
-		if !reflect.DeepEqual(descSorted[i], ifAddrs[i]) {
+		if !reflect.DeepEqual(ascSorted[i], ifAddrs[i]) {
 			t.Errorf("wrong sort order: %d %v %v", i, descSorted[i], ifAddrs[i])
 		}
 	}

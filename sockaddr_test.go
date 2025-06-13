@@ -24,7 +24,6 @@ func TestSockAddr_New(t *testing.T) {
 		FirstUsableAddress string
 		LastUsableAddress  string
 	}
-	type SockAddrFixtures []SockAddrFixtures
 
 	goodResults := []SockAddrFixture{
 		{

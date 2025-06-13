@@ -2,117 +2,58 @@ package sockaddr_test
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 	"testing"
 
 	"github.com/hashicorp/go-sockaddr"
 )
 
-type GoodTestIPAddrTest struct {
-	sockAddrs               sockaddr.SockAddrs
-	sortedBySpecificMasklen sockaddr.SockAddrs
-	sortedByBroadMasklen    sockaddr.SockAddrs
-	sortedByNetwork         sockaddr.SockAddrs
-}
-type GoodTestIPAddrTests []*GoodTestIPAddrTest
-
-func makeTestIPAddrs(t *testing.T) GoodTestIPAddrTests {
-	goodTestInputs := []struct {
-		sockAddrs               []string
-		sortedBySpecificMasklen []string
-		sortedByBroadMasklen    []string
-		sortedByNetwork         []string
-	}{
-		{
-			sockAddrs: []string{
-				"10.0.0.0/8",
-				"172.16.1.3/12",
-				"192.168.0.0/16",
-				"128.95.120.1/32",
-				"192.168.1.10/24",
-				"240.0.0.1/4",
-			},
-			sortedBySpecificMasklen: []string{
-				"128.95.120.1/32",
-				"192.168.1.10/24",
-				"192.168.0.0/16",
-				"172.16.1.3/12",
-				"10.0.0.0/8",
-				"240.0.0.1/4",
-			},
-			sortedByBroadMasklen: []string{
-				"240.0.0.1/4",
-				"10.0.0.0/8",
-				"172.16.1.3/12",
-				"192.168.0.0/16",
-				"192.168.1.10/24",
-				"128.95.120.1/32",
-			},
-			sortedByNetwork: []string{
-				"10.0.0.0/8",
-				"128.95.120.1/32",
-				"172.16.1.3/12",
-				"192.168.0.0/16",
-				"192.168.1.10/24",
-				"240.0.0.1/4",
-			},
+func TestIPAddrs(t *testing.T) {
+	goodTestInputs := map[string][]string{
+		"sockAddrs": []string{
+			"10.0.0.0/8",
+			"172.16.1.3/12",
+			"192.168.0.0/16",
+			"128.95.120.1/32",
+			"192.168.1.10/24",
+			"240.0.0.1/4",
+		},
+		"sortedBySpecificMasklen": []string{
+			"128.95.120.1/32",
+			"192.168.1.10/24",
+			"192.168.0.0/16",
+			"172.16.1.3/12",
+			"10.0.0.0/8",
+			"240.0.0.1/4",
+		},
+		"sortedByBroadMasklen": []string{
+			"240.0.0.1/4",
+			"10.0.0.0/8",
+			"172.16.1.3/12",
+			"192.168.0.0/16",
+			"192.168.1.10/24",
+			"128.95.120.1/32",
+		},
+		"sortedByNetwork": []string{
+			"10.0.0.0/8",
+			"128.95.120.1/32",
+			"172.16.1.3/12",
+			"192.168.0.0/16",
+			"192.168.1.10/24",
+			"240.0.0.1/4",
 		},
 	}
-	gfs := make(GoodTestIPAddrTests, 0, len(goodTestInputs))
-	for idx, gfi := range goodTestInputs {
-		t.Run(fmt.Sprintf("%d", idx), func(t *testing.T) {
-			gf := new(GoodTestIPAddrTest)
-			gf.sockAddrs = make(sockaddr.SockAddrs, 0, len(gfi.sockAddrs))
-			for _, n := range gfi.sockAddrs {
-				sa, err := sockaddr.NewSockAddr(n)
+	for name, addrs := range goodTestInputs {
+		t.Run(name, func(t *testing.T) {
+			for _, addr := range addrs {
+				_, err := sockaddr.NewSockAddr(addr)
 				if err != nil {
-					t.Fatalf("Expected valid network")
+					t.Errorf("Expected valid network: %s", addr)
 				}
-				gf.sockAddrs = append(gf.sockAddrs, sa)
-			}
-
-			gf.sortedBySpecificMasklen = make(sockaddr.SockAddrs, 0, len(gfi.sortedBySpecificMasklen))
-			for _, n := range gfi.sortedBySpecificMasklen {
-				na, err := sockaddr.NewSockAddr(n)
-				if err != nil {
-					t.Fatalf("Expected valid network")
-				}
-				gf.sortedBySpecificMasklen = append(gf.sortedBySpecificMasklen, na)
-			}
-
-			if len(gf.sockAddrs) != len(gf.sortedBySpecificMasklen) {
-				t.Fatalf("Expected same number of sortedBySpecificMasklen networks")
-			}
-
-			gf.sortedByBroadMasklen = make(sockaddr.SockAddrs, 0, len(gfi.sortedByBroadMasklen))
-			for _, n := range gfi.sortedByBroadMasklen {
-				na, err := sockaddr.NewSockAddr(n)
-				if err != nil {
-					t.Fatalf("Expected valid network")
-				}
-				gf.sortedByBroadMasklen = append(gf.sortedByBroadMasklen, na)
-			}
-
-			if len(gf.sockAddrs) != len(gf.sortedByBroadMasklen) {
-				t.Fatalf("Expected same number of sortedByBroadMasklen networks")
-			}
-
-			gf.sortedByNetwork = make(sockaddr.SockAddrs, 0, len(gfi.sortedByNetwork))
-			for _, n := range gfi.sortedByNetwork {
-				na, err := sockaddr.NewSockAddr(n)
-				if err != nil {
-					t.Fatalf("Expected valid network")
-				}
-				gf.sortedByNetwork = append(gf.sortedByNetwork, na)
-			}
-
-			if len(gf.sockAddrs) != len(gf.sortedByNetwork) {
-				t.Fatalf("Expected same number of sortedByNetwork networks")
 			}
 		})
 	}
-
-	return gfs
 }
 
 func TestSockAddr_IPAddrs_BySpecificMaskLen(t *testing.T) {
@@ -140,13 +81,12 @@ func TestSockAddr_IPAddrs_BySpecificMaskLen(t *testing.T) {
 		t.Run(fmt.Sprintf("%d", idx), func(t *testing.T) {
 			inputAddrs := convertToSockAddrs(t, test.inputAddrs)
 			sortedAddrs := convertToSockAddrs(t, test.sortedAddrs)
-			sockaddrs := append(sockaddr.SockAddrs(nil), inputAddrs...)
+			sockaddrs := slices.Clone(inputAddrs)
 			filteredAddrs, _ := sockaddrs.FilterByType(sockaddr.TypeIPv4)
-			ipv4Addrs := make([]sockaddr.IPv4Addr, 0, len(filteredAddrs))
 			for _, x := range filteredAddrs {
-				switch v := x.(type) {
+				switch x.(type) {
 				case sockaddr.IPv4Addr:
-					ipv4Addrs = append(ipv4Addrs, v)
+					// pass
 				default:
 					t.Fatalf("invalid type")
 				}
@@ -162,7 +102,7 @@ func TestSockAddr_IPAddrs_BySpecificMaskLen(t *testing.T) {
 			}
 			sort.Sort(sockaddr.SortIPAddrsBySpecificMaskLen{ipAddrs})
 
-			var lastLen int = 32
+			lastLen := 32
 			for i, netaddr := range ipAddrs {
 				maskLen := netaddr.Maskbits()
 				if lastLen < maskLen {

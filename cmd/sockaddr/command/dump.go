@@ -267,7 +267,7 @@ func (c *DumpCommand) parseOpts(args []string) ([]string, error) {
 		conflictingOptsCount++
 	}
 	if conflictingOptsCount > 1 {
-		return nil, fmt.Errorf("Conflicting options specified, only one parsing mode may be specified at a time")
+		return nil, fmt.Errorf("conflicting options specified, only one parsing mode may be specified at a time")
 	}
 
 	return c.flags.Args(), nil

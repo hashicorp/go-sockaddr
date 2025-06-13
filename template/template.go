@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/hashicorp/errwrap"
 	sockaddr "github.com/hashicorp/go-sockaddr"
 )
 
@@ -119,7 +118,7 @@ func Attr(selectorName string, ifAddrsRaw interface{}) (string, error) {
 func Parse(input string) (string, error) {
 	addrs, err := sockaddr.GetAllInterfaces()
 	if err != nil {
-		return "", errwrap.Wrapf("unable to query interface addresses: {{err}}", err)
+		return "", fmt.Errorf("unable to query interface addresses: %w", err)
 	}
 
 	return ParseIfAddrs(input, addrs)
@@ -142,13 +141,13 @@ func ParseIfAddrsTemplate(input string, ifAddrs sockaddr.IfAddrs, tmplIn *templa
 		Funcs(HelperFuncs).
 		Parse(input)
 	if err != nil {
-		return "", errwrap.Wrapf(fmt.Sprintf("unable to parse template %+q: {{err}}", input), err)
+		return "", fmt.Errorf("unable to parse template %+q: %w", input, err)
 	}
 
 	var outWriter bytes.Buffer
 	err = tmpl.Execute(&outWriter, ifAddrs)
 	if err != nil {
-		return "", errwrap.Wrapf(fmt.Sprintf("unable to execute sockaddr input %+q: {{err}}", input), err)
+		return "", fmt.Errorf("unable to execute sockaddr input %+q: %w", input, err)
 	}
 
 	return outWriter.String(), nil

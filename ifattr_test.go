@@ -13,7 +13,9 @@ func TestIfAttr_net(t *testing.T) {
 	}
 
 	for _, ifAddr := range ifAddrs {
-		testSockAddrAttr(t, ifAddr)
+		t.Run(ifAddr.Name, func(t *testing.T) {
+			testSockAddrAttr(t, ifAddr)
+		})
 	}
 }
 
@@ -30,7 +32,9 @@ func TestIfAttr_unix(t *testing.T) {
 	}
 
 	for _, sa := range unixSockets {
-		testSockAddrAttr(t, sa)
+		t.Run(sa.String(), func(t *testing.T) {
+			testSockAddrAttr(t, sa)
+		})
 	}
 }
 
@@ -69,44 +73,49 @@ func testSockAddrAttr(t *testing.T, sai interface{}) {
 	}
 
 	for _, attrTest := range attrNamesPerType {
-		switch v := sai.(type) {
-		case sockaddr.IfAddr:
-			saType := v.Type()
-			_, err := v.Attr(attrTest.name)
-			switch saType {
-			case sockaddr.TypeIPv4:
-				if err == nil && attrTest.ipv4Pass || err != nil && !attrTest.ipv4Pass {
-					// pass
+		t.Run(string(attrTest.name), func(t *testing.T) {
+			switch v := sai.(type) {
+			case sockaddr.IfAddr:
+				saType := v.Type()
+				_, err := v.Attr(attrTest.name)
+				switch saType {
+				case sockaddr.TypeIPv4:
+					if err == nil && attrTest.ipv4Pass || err != nil && !attrTest.ipv4Pass {
+						// pass
+						return
+					}
+					t.Errorf("Got err %s, expected test to pass: %v", err, attrTest.ipv4Pass)
+				case sockaddr.TypeIPv6:
+					if err == nil && attrTest.ipv6Pass || err != nil && !attrTest.ipv6Pass {
+						// pass
+						return
+					}
+					t.Errorf("Got err %s, expected test to pass: %v", err, attrTest.ipv6Pass)
+				case sockaddr.TypeUnix:
+					if err == nil && attrTest.unixPass || err != nil && !attrTest.unixPass {
+						// pass
+						return
+					}
+					t.Errorf("Got err %s, expected test to pass: %v", err, attrTest.unixPass)
+				default:
+					t.Errorf("Unable to fetch attr name %q: %v", attrTest.name, err)
 				}
-				// fallthrough
-			case sockaddr.TypeIPv6:
-				if err == nil && attrTest.ipv6Pass || err != nil && !attrTest.ipv6Pass {
-					// pass
-				}
-				// fallthrough
-			case sockaddr.TypeUnix:
-				if err == nil && attrTest.unixPass || err != nil && !attrTest.unixPass {
-					// pass
-				}
-				// fallthrough
-			default:
-				t.Errorf("Unable to fetch attr name %q: %v", attrTest.name, err)
-			}
-		case sockaddr.SockAddr:
-			val, err := sockaddr.Attr(v, attrTest.name)
-			_ = err
+			case sockaddr.SockAddr:
+				val, err := sockaddr.Attr(v, attrTest.name)
+				_ = err
 
-			pass := len(val) > 0
-			switch {
-			case v.Type() == sockaddr.TypeIPv4 && attrTest.ipv4Pass == pass,
-				v.Type() == sockaddr.TypeIPv6 && attrTest.ipv6Pass == pass,
-				v.Type() == sockaddr.TypeUnix && attrTest.unixPass == pass:
-				// pass
+				pass := len(val) > 0
+				switch {
+				case v.Type() == sockaddr.TypeIPv4 && attrTest.ipv4Pass == pass,
+					v.Type() == sockaddr.TypeIPv6 && attrTest.ipv6Pass == pass,
+					v.Type() == sockaddr.TypeUnix && attrTest.unixPass == pass:
+					// pass
+				default:
+					t.Errorf("Unable to fetch attr name %q from %v / %v + %+q", attrTest.name, v, v.Type(), val)
+				}
 			default:
-				t.Errorf("Unable to fetch attr name %q from %v / %v + %+q", attrTest.name, v, v.Type(), val)
+				t.Fatalf("unsupported type %T %v", sai, sai)
 			}
-		default:
-			t.Fatalf("unsupported type %T %v", sai, sai)
-		}
+		})
 	}
 }
