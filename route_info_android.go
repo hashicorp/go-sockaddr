@@ -26,7 +26,7 @@ func (ri routeInfo) GetDefaultInterfaceName() (string, error) {
 
 	var ifName string
 	if ifName, err = parseDefaultIfNameFromIPCmdAndroid(string(out)); err != nil {
-		return "", errors.New("No default interface found")
+		return "", errors.New("no default interface found")
 	}
 	return ifName, nil
 }
@@ -40,5 +40,5 @@ func parseDefaultIfNameFromIPCmdAndroid(routeOut string) (string, error) {
 		return ifName, nil
 	}
 
-	return "", errors.New("No default interface found")
+	return "", errors.New("no default interface found")
 }
