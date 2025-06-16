@@ -32,4 +32,3 @@ jobs:
                 name: coverage-report-${{matrix.version}}
             - name: Display coverage report
               run: go tool cover -func=coverage.out
-              
