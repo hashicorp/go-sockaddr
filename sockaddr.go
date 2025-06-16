@@ -1,6 +1,7 @@
 package sockaddr
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -78,7 +79,7 @@ func NewSockAddr(s string) (SockAddr, error) {
 
 	// Check to make sure the string begins with either a '.' or '/', or
 	// contains a '/'.
-	if len(s) > 1 && (strings.ContainsAny(s[0:1], "./") || strings.IndexByte(s, '/') != -1) {
+	if len(s) > 1 && (strings.ContainsAny(s[0:1], "./") || bytes.ContainsAny([]byte(s), "/")) {
 		unixSock, err := NewUnixSock(s)
 		if err == nil {
 			return unixSock, nil

@@ -101,8 +101,7 @@ func testSockAddrAttr(t *testing.T, sai interface{}) {
 					t.Errorf("Unable to fetch attr name %q: %v", attrTest.name, err)
 				}
 			case sockaddr.SockAddr:
-				val, err := sockaddr.Attr(v, attrTest.name)
-				_ = err
+				val, _ := sockaddr.Attr(v, attrTest.name)
 
 				pass := len(val) > 0
 				switch {

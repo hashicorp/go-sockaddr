@@ -286,7 +286,11 @@ func GetDefaultInterfaces() (IfAddrs, error) {
 	}
 
 	var defaultIfs, ifAddrs IfAddrs
-	ifAddrs, _ = GetAllInterfaces()
+	ifAddrs, err = GetAllInterfaces()
+	if err != nil {
+		return nil, err
+	}
+
 	for _, ifAddr := range ifAddrs {
 		if ifAddr.Name == defaultIfName {
 			defaultIfs = append(defaultIfs, ifAddr)
