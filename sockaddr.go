@@ -1,6 +1,7 @@
 package sockaddr
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -11,9 +12,9 @@ type AttrName string
 
 const (
 	TypeUnknown SockAddrType = 0x0
-	TypeUnix                 = 0x1
-	TypeIPv4                 = 0x2
-	TypeIPv6                 = 0x4
+	TypeUnix    SockAddrType = 0x1
+	TypeIPv4    SockAddrType = 0x2
+	TypeIPv6    SockAddrType = 0x4
 
 	// TypeIP is the union of TypeIPv4 and TypeIPv6
 	TypeIP = 0x6
@@ -78,14 +79,14 @@ func NewSockAddr(s string) (SockAddr, error) {
 
 	// Check to make sure the string begins with either a '.' or '/', or
 	// contains a '/'.
-	if len(s) > 1 && (strings.IndexAny(s[0:1], "./") != -1 || strings.IndexByte(s, '/') != -1) {
+	if len(s) > 1 && (strings.ContainsAny(s[0:1], "./") || bytes.ContainsAny([]byte(s), "/")) {
 		unixSock, err := NewUnixSock(s)
 		if err == nil {
 			return unixSock, nil
 		}
 	}
 
-	return nil, fmt.Errorf("Unable to convert %q to an IPv4 or IPv6 address, or a UNIX Socket", s)
+	return nil, fmt.Errorf("unable to convert %q to an IPv4 or IPv6 address, or a UNIX Socket", s)
 }
 
 // ToIPAddr returns an IPAddr type or nil if the type conversion fails.
@@ -203,4 +204,10 @@ func (s *SockAddrMarshaler) UnmarshalJSON(in []byte) error {
 	}
 	s.SockAddr = sa
 	return nil
+}
+
+// Explicit Stringer implementation to remove ambiguity and workaround
+// staticcheck QF01008.
+func (s *SockAddrMarshaler) String() string {
+	return s.SockAddr.String()
 }

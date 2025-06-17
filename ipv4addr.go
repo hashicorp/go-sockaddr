@@ -58,8 +58,7 @@ func NewIPv4Addr(ipv4Str string) (IPv4Addr, error) {
 	// Strip off any bogus hex-encoded netmasks that will be mis-parsed by Go.  In
 	// particular, clients with the Barracuda VPN client will see something like:
 	// `192.168.3.51/00ffffff` as their IP address.
-	trailingHexNetmaskRe := trailingHexNetmaskRE.Copy()
-	if match := trailingHexNetmaskRe.FindStringIndex(ipv4Str); match != nil {
+	if match := trailingHexNetmaskRE.FindStringIndex(ipv4Str); match != nil {
 		ipv4Str = ipv4Str[:match[0]]
 	}
 
@@ -68,7 +67,7 @@ func NewIPv4Addr(ipv4Str string) (IPv4Addr, error) {
 	if err == nil {
 		ipv4 := ipAddr.To4()
 		if ipv4 == nil {
-			return IPv4Addr{}, fmt.Errorf("Unable to convert %s to an IPv4 address", ipv4Str)
+			return IPv4Addr{}, fmt.Errorf("unable to convert %s to an IPv4 address", ipv4Str)
 		}
 
 		// If we see an IPv6 netmask, convert it to an IPv4 mask.
@@ -76,9 +75,9 @@ func NewIPv4Addr(ipv4Str string) (IPv4Addr, error) {
 		if netmaskSepPos != -1 && netmaskSepPos+1 < len(ipv4Str) {
 			netMask, err := strconv.ParseUint(ipv4Str[netmaskSepPos+1:], 10, 8)
 			if err != nil {
-				return IPv4Addr{}, fmt.Errorf("Unable to convert %s to an IPv4 address: unable to parse CIDR netmask: %v", ipv4Str, err)
+				return IPv4Addr{}, fmt.Errorf("unable to convert %s to an IPv4 address: unable to parse CIDR netmask: %v", ipv4Str, err)
 			} else if netMask > 128 {
-				return IPv4Addr{}, fmt.Errorf("Unable to convert %s to an IPv4 address: invalid CIDR netmask", ipv4Str)
+				return IPv4Addr{}, fmt.Errorf("unable to convert %s to an IPv4 address: invalid CIDR netmask", ipv4Str)
 			}
 
 			if netMask >= 96 {
@@ -98,7 +97,7 @@ func NewIPv4Addr(ipv4Str string) (IPv4Addr, error) {
 	if err == nil {
 		ipv4 := tcpAddr.IP.To4()
 		if ipv4 == nil {
-			return IPv4Addr{}, fmt.Errorf("Unable to resolve %+q as an IPv4 address", ipv4Str)
+			return IPv4Addr{}, fmt.Errorf("unable to resolve %+q as an IPv4 address", ipv4Str)
 		}
 
 		ipv4Uint32 := binary.BigEndian.Uint32(ipv4)
@@ -116,7 +115,7 @@ func NewIPv4Addr(ipv4Str string) (IPv4Addr, error) {
 	if ip != nil {
 		ipv4 := ip.To4()
 		if ipv4 == nil {
-			return IPv4Addr{}, fmt.Errorf("Unable to string convert %+q to an IPv4 address", ipv4Str)
+			return IPv4Addr{}, fmt.Errorf("unable to string convert %+q to an IPv4 address", ipv4Str)
 		}
 
 		ipv4Uint32 := binary.BigEndian.Uint32(ipv4)
@@ -127,7 +126,7 @@ func NewIPv4Addr(ipv4Str string) (IPv4Addr, error) {
 		return ipv4Addr, nil
 	}
 
-	return IPv4Addr{}, fmt.Errorf("Unable to parse %+q to an IPv4 address: %v", ipv4Str, err)
+	return IPv4Addr{}, fmt.Errorf("unable to parse %+q to an IPv4 address: %v", ipv4Str, err)
 }
 
 // AddressBinString returns a string with the IPv4Addr's Address represented
@@ -165,10 +164,10 @@ func (ipv4 IPv4Addr) BroadcastAddress() IPv4Network {
 
 // CmpAddress follows the Cmp() standard protocol and returns:
 //
-// - -1 If the receiver should sort first because its address is lower than arg
-// - 0 if the SockAddr arg is equal to the receiving IPv4Addr or the argument is
-//   of a different type.
-// - 1 If the argument should sort first.
+//   - -1 If the receiver should sort first because its address is lower than arg
+//   - 0 if the SockAddr arg is equal to the receiving IPv4Addr or the argument is
+//     of a different type.
+//   - 1 If the argument should sort first.
 func (ipv4 IPv4Addr) CmpAddress(sa SockAddr) int {
 	ipv4b, ok := sa.(IPv4Addr)
 	if !ok {
@@ -187,10 +186,10 @@ func (ipv4 IPv4Addr) CmpAddress(sa SockAddr) int {
 
 // CmpPort follows the Cmp() standard protocol and returns:
 //
-// - -1 If the receiver should sort first because its port is lower than arg
-// - 0 if the SockAddr arg's port number is equal to the receiving IPv4Addr,
-//   regardless of type.
-// - 1 If the argument should sort first.
+//   - -1 If the receiver should sort first because its port is lower than arg
+//   - 0 if the SockAddr arg's port number is equal to the receiving IPv4Addr,
+//     regardless of type.
+//   - 1 If the argument should sort first.
 func (ipv4 IPv4Addr) CmpPort(sa SockAddr) int {
 	var saPort IPPort
 	switch v := sa.(type) {
@@ -214,10 +213,10 @@ func (ipv4 IPv4Addr) CmpPort(sa SockAddr) int {
 
 // CmpRFC follows the Cmp() standard protocol and returns:
 //
-// - -1 If the receiver should sort first because it belongs to the RFC and its
-//   arg does not
-// - 0 if the receiver and arg both belong to the same RFC or neither do.
-// - 1 If the arg belongs to the RFC but receiver does not.
+//   - -1 If the receiver should sort first because it belongs to the RFC and its
+//     arg does not
+//   - 0 if the receiver and arg both belong to the same RFC or neither do.
+//   - 1 If the arg belongs to the RFC but receiver does not.
 func (ipv4 IPv4Addr) CmpRFC(rfcNum uint, sa SockAddr) int {
 	recvInRFC := IsRFC(rfcNum, ipv4)
 	ipv4b, ok := sa.(IPv4Addr)
@@ -405,7 +404,7 @@ func (ipv4 IPv4Addr) Maskbits() int {
 func MustIPv4Addr(addr string) IPv4Addr {
 	ipv4, err := NewIPv4Addr(addr)
 	if err != nil {
-		panic(fmt.Sprintf("Unable to create an IPv4Addr from %+q: %v", addr, err))
+		panic(fmt.Sprintf("unable to create an IPv4Addr from %+q: %v", addr, err))
 	}
 	return ipv4
 }
@@ -420,8 +419,7 @@ func (ipv4 IPv4Addr) NetIP() *net.IP {
 
 // NetIPMask create a new net.IPMask from the IPv4Addr.
 func (ipv4 IPv4Addr) NetIPMask() *net.IPMask {
-	ipv4Mask := net.IPMask{}
-	ipv4Mask = make(net.IPMask, IPv4len)
+	ipv4Mask := make(net.IPMask, IPv4len)
 	binary.BigEndian.PutUint32(ipv4Mask, uint32(ipv4.Mask))
 	return &ipv4Mask
 }

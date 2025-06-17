@@ -1,31 +1,12 @@
 package sockaddr_test
 
 import (
-	crand "crypto/rand"
 	"fmt"
-	"math"
-	"math/big"
 	"math/rand"
 	"testing"
-	"time"
 
 	sockaddr "github.com/hashicorp/go-sockaddr"
 )
-
-func init() {
-	seedMathRand()
-}
-
-// seedMathRand provides weak, but guaranteed seeding, which is better than
-// running with Go's default seed of 1.
-func seedMathRand() {
-	n, err := crand.Int(crand.Reader, big.NewInt(math.MaxInt64))
-	if err != nil {
-		rand.Seed(time.Now().UTC().UnixNano())
-		return
-	}
-	rand.Seed(n.Int64())
-}
 
 // NOTE: A number of these code paths are exercised in template/ and
 // cmd/sockaddr/

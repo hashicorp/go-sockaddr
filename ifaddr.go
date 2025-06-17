@@ -17,7 +17,7 @@ func init() {
 //
 // ```
 // $ sockaddr eval -r '{{GetPrivateInterfaces | attr "address"}}'
-/// ```
+// ```
 func GetPrivateIP() (string, error) {
 	privateIfs, err := GetPrivateInterfaces()
 	if err != nil {
@@ -39,7 +39,7 @@ func GetPrivateIP() (string, error) {
 //
 // ```
 // $ sockaddr eval -r '{{GetAllInterfaces | include "RFC" "6890" | join "address" " "}}'
-/// ```
+// ```
 func GetPrivateIPs() (string, error) {
 	ifAddrs, err := GetAllInterfaces()
 	if err != nil {
@@ -86,7 +86,7 @@ func GetPrivateIPs() (string, error) {
 //
 // ```
 // $ sockaddr eval -r '{{GetPublicInterfaces | attr "address"}}'
-/// ```
+// ```
 func GetPublicIP() (string, error) {
 	publicIfs, err := GetPublicInterfaces()
 	if err != nil {
@@ -108,7 +108,7 @@ func GetPublicIP() (string, error) {
 //
 // ```
 // $ sockaddr eval -r '{{GetAllInterfaces | exclude "RFC" "6890" | join "address" " "}}'
-/// ```
+// ```
 func GetPublicIPs() (string, error) {
 	ifAddrs, err := GetAllInterfaces()
 	if err != nil {
@@ -147,7 +147,7 @@ func GetPublicIPs() (string, error) {
 //
 // ```
 // $ sockaddr eval -r '{{GetAllInterfaces | include "name" <<ARG>> | sort "type,size" | include "flag" "forwardable" | attr "address" }}'
-/// ```
+// ```
 func GetInterfaceIP(namedIfRE string) (string, error) {
 	ifAddrs, err := GetAllInterfaces()
 	if err != nil {
@@ -188,7 +188,7 @@ func GetInterfaceIP(namedIfRE string) (string, error) {
 //
 // ```
 // $ sockaddr eval -r '{{GetAllInterfaces | include "name" <<ARG>> | sort "type,size" | join "address" " "}}'
-/// ```
+// ```
 func GetInterfaceIPs(namedIfRE string) (string, error) {
 	ifAddrs, err := GetAllInterfaces()
 	if err != nil {
@@ -245,10 +245,10 @@ func ifAddrAttrInit() {
 
 	ifAddrAttrMap = map[AttrName]func(ifAddr IfAddr) string{
 		"flags": func(ifAddr IfAddr) string {
-			return ifAddr.Interface.Flags.String()
+			return ifAddr.Flags.String()
 		},
 		"name": func(ifAddr IfAddr) string {
-			return ifAddr.Interface.Name
+			return ifAddr.Name
 		},
 	}
 }

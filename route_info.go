@@ -1,9 +1,12 @@
 package sockaddr
 
-import "errors"
+import (
+	"errors"
+	"slices"
+)
 
 var (
-	ErrNoInterface = errors.New("No default interface found (unsupported platform)")
+	ErrNoInterface = errors.New("no default interface found (unsupported platform)")
 	ErrNoRoute     = errors.New("no route info found (unsupported platform)")
 )
 
@@ -24,7 +27,7 @@ type routeInfo struct {
 // implementation.
 func (ri routeInfo) VisitCommands(fn func(name string, cmd []string)) {
 	for k, v := range ri.cmds {
-		cmds := append([]string(nil), v...)
+		cmds := slices.Clone(v)
 		fn(k, cmds)
 	}
 }

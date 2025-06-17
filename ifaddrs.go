@@ -13,7 +13,8 @@ import (
 )
 
 var (
-	// Centralize all regexps and regexp.Copy() where necessary.
+	// Regexp used to enforce the sign being a required part of the grammar for
+	// some values.
 	signRE       *regexp.Regexp = regexp.MustCompile(`^[\s]*[+-]`)
 	whitespaceRE *regexp.Regexp = regexp.MustCompile(`[\s]+`)
 	// These regular expressions enable the deprecated parseDefaultIfNameWindows
@@ -88,7 +89,6 @@ func (ms *multiIfAddrSorter) Less(i, j int) bool {
 	default:
 		// Still a tie! Now what?
 		return false
-		panic("undefined sort order for remaining items in the list")
 	}
 }
 
@@ -126,11 +126,11 @@ func AscIfDefault(p1Ptr, p2Ptr *IfAddr) int {
 	}
 
 	switch {
-	case p1Ptr.Interface.Name == defaultIfName && p2Ptr.Interface.Name == defaultIfName:
+	case p1Ptr.Name == defaultIfName && p2Ptr.Name == defaultIfName:
 		return sortDeferDecision
-	case p1Ptr.Interface.Name == defaultIfName:
+	case p1Ptr.Name == defaultIfName:
 		return sortReceiverBeforeArg
-	case p2Ptr.Interface.Name == defaultIfName:
+	case p2Ptr.Name == defaultIfName:
 		return sortArgBeforeReceiver
 	default:
 		return sortDeferDecision
@@ -209,7 +209,7 @@ func FilterIfByType(ifAddrs IfAddrs, type_ SockAddrType) (matchedIfs, excludedIf
 	matchedIfs = make(IfAddrs, 0, len(ifAddrs))
 
 	for _, ifAddr := range ifAddrs {
-		if ifAddr.SockAddr.Type()&type_ != 0 {
+		if ifAddr.Type()&type_ != 0 {
 			matchedIfs = append(matchedIfs, ifAddr)
 		} else {
 			excludedIfs = append(excludedIfs, ifAddr)
@@ -287,6 +287,10 @@ func GetDefaultInterfaces() (IfAddrs, error) {
 
 	var defaultIfs, ifAddrs IfAddrs
 	ifAddrs, err = GetAllInterfaces()
+	if err != nil {
+		return nil, err
+	}
+
 	for _, ifAddr := range ifAddrs {
 		if ifAddr.Name == defaultIfName {
 			defaultIfs = append(defaultIfs, ifAddr)
@@ -303,7 +307,7 @@ func GetDefaultInterfaces() (IfAddrs, error) {
 //
 // ```
 // $ sockaddr eval -r '{{GetAllInterfaces | include "type" "ip" | include "flags" "forwardable" | include "flags" "up" | sort "default,type,size" | include "RFC" "6890" }}'
-/// ```
+// ```
 func GetPrivateInterfaces() (IfAddrs, error) {
 	privateIfs, err := GetAllInterfaces()
 	if err != nil {
@@ -351,7 +355,7 @@ func GetPrivateInterfaces() (IfAddrs, error) {
 //
 // ```
 // $ sockaddr eval -r '{{GetAllInterfaces | include "type" "ip" | include "flags" "forwardable" | include "flags" "up" | sort "default,type,size" | exclude "RFC" "6890" }}'
-/// ```
+// ```
 func GetPublicInterfaces() (IfAddrs, error) {
 	publicIfs, err := GetAllInterfaces()
 	if err != nil {
@@ -397,7 +401,7 @@ func GetPublicInterfaces() (IfAddrs, error) {
 func IfByAddress(inputRe string, ifAddrs IfAddrs) (matched, remainder IfAddrs, err error) {
 	re, err := regexp.Compile(inputRe)
 	if err != nil {
-		return nil, nil, fmt.Errorf("Unable to compile address regexp %+q: %v", inputRe, err)
+		return nil, nil, fmt.Errorf("unable to compile address regexp %+q: %v", inputRe, err)
 	}
 
 	matchedAddrs := make(IfAddrs, 0, len(ifAddrs))
@@ -418,7 +422,7 @@ func IfByAddress(inputRe string, ifAddrs IfAddrs) (matched, remainder IfAddrs, e
 func IfByName(inputRe string, ifAddrs IfAddrs) (matched, remainder IfAddrs, err error) {
 	re, err := regexp.Compile(inputRe)
 	if err != nil {
-		return nil, nil, fmt.Errorf("Unable to compile name regexp %+q: %v", inputRe, err)
+		return nil, nil, fmt.Errorf("unable to compile name regexp %+q: %v", inputRe, err)
 	}
 
 	matchedAddrs := make(IfAddrs, 0, len(ifAddrs))
@@ -439,7 +443,7 @@ func IfByName(inputRe string, ifAddrs IfAddrs) (matched, remainder IfAddrs, err 
 func IfByPort(inputRe string, ifAddrs IfAddrs) (matchedIfs, excludedIfs IfAddrs, err error) {
 	re, err := regexp.Compile(inputRe)
 	if err != nil {
-		return nil, nil, fmt.Errorf("Unable to compile port regexp %+q: %v", inputRe, err)
+		return nil, nil, fmt.Errorf("unable to compile port regexp %+q: %v", inputRe, err)
 	}
 
 	ipIfs, nonIfs := FilterIfByType(ifAddrs, TypeIP)
@@ -574,13 +578,13 @@ func IfByType(inputTypes string, ifAddrs IfAddrs) (matched, remainder IfAddrs, e
 		for _, ifType := range ifTypes {
 			var matched bool
 			switch {
-			case ifType == "ip" && ifAddr.SockAddr.Type()&TypeIP != 0:
+			case ifType == "ip" && ifAddr.Type()&TypeIP != 0:
 				matched = true
-			case ifType == "ipv4" && ifAddr.SockAddr.Type()&TypeIPv4 != 0:
+			case ifType == "ipv4" && ifAddr.Type()&TypeIPv4 != 0:
 				matched = true
-			case ifType == "ipv6" && ifAddr.SockAddr.Type()&TypeIPv6 != 0:
+			case ifType == "ipv6" && ifAddr.Type()&TypeIPv6 != 0:
 				matched = true
-			case ifType == "unix" && ifAddr.SockAddr.Type()&TypeUnix != 0:
+			case ifType == "unix" && ifAddr.Type()&TypeUnix != 0:
 				matched = true
 			}
 
@@ -660,13 +664,13 @@ func IfByFlag(inputFlags string, ifAddrs IfAddrs) (matched, remainder IfAddrs, e
 			checkFlags = true
 			ifFlags = ifFlags | net.FlagUp
 		default:
-			return nil, nil, fmt.Errorf("Unknown interface flag: %+q", flagName)
+			return nil, nil, fmt.Errorf("unknown interface flag: %+q", flagName)
 		}
 	}
 
 	for _, ifAddr := range ifAddrs {
 		var matched bool
-		if checkFlags && ifAddr.Interface.Flags&ifFlags == ifFlags {
+		if checkFlags && ifAddr.Flags&ifFlags == ifFlags {
 			matched = true
 		}
 		if checkAttrs {
@@ -725,9 +729,6 @@ func IfByNetwork(selectorParam string, inputIfAddrs IfAddrs) (IfAddrs, IfAddrs, 
 
 // IfAddrMath will return a new IfAddr struct with a mutated value.
 func IfAddrMath(operation, value string, inputIfAddr IfAddr) (IfAddr, error) {
-	// Regexp used to enforce the sign being a required part of the grammar for
-	// some values.
-	signRe := signRE.Copy()
 
 	switch strings.ToLower(operation) {
 	case "address":
@@ -735,11 +736,11 @@ func IfAddrMath(operation, value string, inputIfAddr IfAddr) (IfAddr, error) {
 		// underflow networks, however it will wrap along the underlying address's
 		// underlying type.
 
-		if !signRe.MatchString(value) {
+		if !signRE.MatchString(value) {
 			return IfAddr{}, fmt.Errorf("sign (+/-) is required for operation %q", operation)
 		}
 
-		switch sockType := inputIfAddr.SockAddr.Type(); sockType {
+		switch sockType := inputIfAddr.Type(); sockType {
 		case TypeIPv4:
 			// 33 == Accept any uint32 value
 			// TODO(seanc@): Add the ability to parse hex
@@ -790,11 +791,11 @@ func IfAddrMath(operation, value string, inputIfAddr IfAddr) (IfAddr, error) {
 		// means a "-1" value on a network will be the broadcast address after
 		// wrapping is applied.
 
-		if !signRe.MatchString(value) {
+		if !signRE.MatchString(value) {
 			return IfAddr{}, fmt.Errorf("sign (+/-) is required for operation %q", operation)
 		}
 
-		switch sockType := inputIfAddr.SockAddr.Type(); sockType {
+		switch sockType := inputIfAddr.Type(); sockType {
 		case TypeIPv4:
 			// 33 == Accept any uint32 value
 			// TODO(seanc@): Add the ability to parse hex
@@ -874,7 +875,7 @@ func IfAddrMath(operation, value string, inputIfAddr IfAddr) (IfAddr, error) {
 		// which the given integer mask has been applied. If the applied mask
 		// corresponds to a larger network than the mask of the IP address,
 		// the latter will be replaced by the former.
-		switch sockType := inputIfAddr.SockAddr.Type(); sockType {
+		switch sockType := inputIfAddr.Type(); sockType {
 		case TypeIPv4:
 			i, err := strconv.ParseUint(value, 10, 32)
 			if err != nil {
@@ -1193,7 +1194,7 @@ func parseDefaultIfNameFromRoute(routeOut string) (string, error) {
 		}
 	}
 
-	return "", errors.New("No default interface found")
+	return "", errors.New("no default interface found")
 }
 
 // parseDefaultIfNameFromIPCmd parses the default interface from ip(8) for
@@ -1209,29 +1210,16 @@ func parseDefaultIfNameFromIPCmd(routeOut string) (string, error) {
 		}
 	}
 
-	return "", errors.New("No default interface found")
-}
-
-// parseDefaultIfNameFromIPCmdAndroid parses the default interface from ip(8) for
-// Android.
-func parseDefaultIfNameFromIPCmdAndroid(routeOut string) (string, error) {
-	parsedLines := parseIfNameFromIPCmd(routeOut)
-	if len(parsedLines) > 0 {
-		ifName := strings.TrimSpace(parsedLines[0][4])
-		return ifName, nil
-	}
-
-	return "", errors.New("No default interface found")
+	return "", errors.New("no default interface found")
 }
 
 // parseIfNameFromIPCmd parses interfaces from ip(8) for
 // Linux.
 func parseIfNameFromIPCmd(routeOut string) [][]string {
 	lines := strings.Split(routeOut, "\n")
-	re := whitespaceRE.Copy()
 	parsedLines := make([][]string, 0, len(lines))
 	for _, line := range lines {
-		kvs := re.Split(line, -1)
+		kvs := whitespaceRE.Split(line, -1)
 		if len(kvs) < 5 {
 			continue
 		}
@@ -1273,9 +1261,8 @@ func parseDefaultIfNameWindows(routeOut, ipconfigOut string) (string, error) {
 // compatibility.
 func parseDefaultIPAddrWindowsRoute(routeOut string) (string, error) {
 	lines := strings.Split(routeOut, "\n")
-	re := whitespaceRE.Copy()
 	for _, line := range lines {
-		kvs := re.Split(strings.TrimSpace(line), -1)
+		kvs := whitespaceRE.Split(strings.TrimSpace(line), -1)
 		if len(kvs) < 3 {
 			continue
 		}
@@ -1286,7 +1273,7 @@ func parseDefaultIPAddrWindowsRoute(routeOut string) (string, error) {
 		}
 	}
 
-	return "", errors.New("No IP on default interface found")
+	return "", errors.New("no IP on default interface found")
 }
 
 // parseDefaultIfNameWindowsIPConfig parses the output of `ipconfig` to find the
@@ -1297,21 +1284,19 @@ func parseDefaultIPAddrWindowsRoute(routeOut string) (string, error) {
 // compatibility
 func parseDefaultIfNameWindowsIPConfig(defaultIPAddr, routeOut string) (string, error) {
 	lines := strings.Split(routeOut, "\n")
-	ifNameRe := ifNameRE.Copy()
-	ipAddrRe := ipAddrRE.Copy()
 	var ifName string
 	for _, line := range lines {
-		switch ifNameMatches := ifNameRe.FindStringSubmatch(line); {
+		switch ifNameMatches := ifNameRE.FindStringSubmatch(line); {
 		case len(ifNameMatches) > 1:
 			ifName = ifNameMatches[1]
 			continue
 		}
 
-		switch ipAddrMatches := ipAddrRe.FindStringSubmatch(line); {
+		switch ipAddrMatches := ipAddrRE.FindStringSubmatch(line); {
 		case len(ipAddrMatches) > 1 && ipAddrMatches[1] == defaultIPAddr:
 			return ifName, nil
 		}
 	}
 
-	return "", errors.New("No default interface found with matching IP")
+	return "", errors.New("no default interface found with matching IP")
 }

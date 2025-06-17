@@ -82,7 +82,7 @@ LOOP:
 	}
 
 	if !v6Addr {
-		return IPv6Addr{}, fmt.Errorf("Unable to resolve %+q as an IPv6 address, appears to be an IPv4 address", ipv6Str)
+		return IPv6Addr{}, fmt.Errorf("unable to resolve %+q as an IPv6 address, appears to be an IPv4 address", ipv6Str)
 	}
 
 	// Attempt to parse ipv6Str as a /128 host with a port number.
@@ -90,7 +90,7 @@ LOOP:
 	if err == nil {
 		ipv6 := tcpAddr.IP.To16()
 		if ipv6 == nil {
-			return IPv6Addr{}, fmt.Errorf("Unable to resolve %+q as a 16byte IPv6 address", ipv6Str)
+			return IPv6Addr{}, fmt.Errorf("unable to resolve %+q as a 16byte IPv6 address", ipv6Str)
 		}
 
 		ipv6BigIntAddr := new(big.Int)
@@ -116,7 +116,7 @@ LOOP:
 	if ip != nil {
 		ipv6 := ip.To16()
 		if ipv6 == nil {
-			return IPv6Addr{}, fmt.Errorf("Unable to string convert %+q to a 16byte IPv6 address", ipv6Str)
+			return IPv6Addr{}, fmt.Errorf("unable to string convert %+q to a 16byte IPv6 address", ipv6Str)
 		}
 
 		ipv6BigIntAddr := new(big.Int)
@@ -136,7 +136,7 @@ LOOP:
 	if err == nil {
 		ipv6 := ipAddr.To16()
 		if ipv6 == nil {
-			return IPv6Addr{}, fmt.Errorf("Unable to convert %+q to a 16byte IPv6 address", ipv6Str)
+			return IPv6Addr{}, fmt.Errorf("unable to convert %+q to a 16byte IPv6 address", ipv6Str)
 		}
 
 		ipv6BigIntAddr := new(big.Int)
@@ -152,7 +152,7 @@ LOOP:
 		return ipv6Addr, nil
 	}
 
-	return IPv6Addr{}, fmt.Errorf("Unable to parse %+q to an IPv6 address: %v", ipv6Str, err)
+	return IPv6Addr{}, fmt.Errorf("unable to parse %+q to an IPv6 address: %v", ipv6Str, err)
 }
 
 // AddressBinString returns a string with the IPv6Addr's Address represented
@@ -173,10 +173,10 @@ func (ipv6 IPv6Addr) AddressHexString() string {
 
 // CmpAddress follows the Cmp() standard protocol and returns:
 //
-// - -1 If the receiver should sort first because its address is lower than arg
-// - 0 if the SockAddr arg equal to the receiving IPv6Addr or the argument is of a
-//   different type.
-// - 1 If the argument should sort first.
+//   - -1 If the receiver should sort first because its address is lower than arg
+//   - 0 if the SockAddr arg equal to the receiving IPv6Addr or the argument is of a
+//     different type.
+//   - 1 If the argument should sort first.
 func (ipv6 IPv6Addr) CmpAddress(sa SockAddr) int {
 	ipv6b, ok := sa.(IPv6Addr)
 	if !ok {
@@ -193,10 +193,10 @@ func (ipv6 IPv6Addr) CmpAddress(sa SockAddr) int {
 
 // CmpPort follows the Cmp() standard protocol and returns:
 //
-// - -1 If the receiver should sort first because its port is lower than arg
-// - 0 if the SockAddr arg's port number is equal to the receiving IPv6Addr,
-//   regardless of type.
-// - 1 If the argument should sort first.
+//   - -1 If the receiver should sort first because its port is lower than arg
+//   - 0 if the SockAddr arg's port number is equal to the receiving IPv6Addr,
+//     regardless of type.
+//   - 1 If the argument should sort first.
 func (ipv6 IPv6Addr) CmpPort(sa SockAddr) int {
 	var saPort IPPort
 	switch v := sa.(type) {
@@ -220,10 +220,10 @@ func (ipv6 IPv6Addr) CmpPort(sa SockAddr) int {
 
 // CmpRFC follows the Cmp() standard protocol and returns:
 //
-// - -1 If the receiver should sort first because it belongs to the RFC and its
-//   arg does not
-// - 0 if the receiver and arg both belong to the same RFC or neither do.
-// - 1 If the arg belongs to the RFC but receiver does not.
+//   - -1 If the receiver should sort first because it belongs to the RFC and its
+//     arg does not
+//   - 0 if the receiver and arg both belong to the same RFC or neither do.
+//   - 1 If the arg belongs to the RFC but receiver does not.
 func (ipv6 IPv6Addr) CmpRFC(rfcNum uint, sa SockAddr) int {
 	recvInRFC := IsRFC(rfcNum, ipv6)
 	ipv6b, ok := sa.(IPv6Addr)
@@ -442,7 +442,7 @@ func (ipv6 IPv6Addr) Maskbits() int {
 func MustIPv6Addr(addr string) IPv6Addr {
 	ipv6, err := NewIPv6Addr(addr)
 	if err != nil {
-		panic(fmt.Sprintf("Unable to create an IPv6Addr from %+q: %v", addr, err))
+		panic(fmt.Sprintf("unable to create an IPv6Addr from %+q: %v", addr, err))
 	}
 	return ipv6
 }
@@ -571,13 +571,13 @@ func bigIntToNetIPv6(bi *big.Int) *net.IP {
 
 		for i := len(ipv6Bytes); i < IPv6len; i++ {
 			if err := binary.Write(buf, binary.BigEndian, byte(0)); err != nil {
-				panic(fmt.Sprintf("Unable to pad byte %d of input %v: %v", i, bi, err))
+				panic(fmt.Sprintf("unable to pad byte %d of input %v: %v", i, bi, err))
 			}
 		}
 
 		for _, b := range ipv6Bytes {
 			if err := binary.Write(buf, binary.BigEndian, b); err != nil {
-				panic(fmt.Sprintf("Unable to preserve endianness of input %v: %v", bi, err))
+				panic(fmt.Sprintf("unable to preserve endianness of input %v: %v", bi, err))
 			}
 		}
 
