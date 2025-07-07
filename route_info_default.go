@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 //go:build nacl || plan9 || js || wasip1
 // +build nacl plan9 js wasip1
 
