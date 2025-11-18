@@ -1,4 +1,7 @@
 #!/bin/sh --
+# Copyright IBM Corp. 2016, 2025
+# SPDX-License-Identifier: MPL-2.0
+
 
 exec 2>&1
 # This should succeed because it is a mapped address

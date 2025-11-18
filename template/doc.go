@@ -1,3 +1,6 @@
+// Copyright IBM Corp. 2016, 2025
+// SPDX-License-Identifier: MPL-2.0
+
 /*
 
 Package sockaddr/template provides a text/template interface the SockAddr helper

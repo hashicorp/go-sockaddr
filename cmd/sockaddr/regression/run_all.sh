@@ -1,4 +1,7 @@
 #!/bin/sh --
+# Copyright IBM Corp. 2016, 2025
+# SPDX-License-Identifier: MPL-2.0
+
 
 FIND=`/usr/bin/which 2> /dev/null gfind find | /usr/bin/grep -v ^no | /usr/bin/head -n 1`
 XARGS=`/usr/bin/which 2> /dev/null gxargs xargs | /usr/bin/grep -v ^no | /usr/bin/head -n 1`

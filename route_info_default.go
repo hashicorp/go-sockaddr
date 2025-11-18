@@ -1,3 +1,6 @@
+// Copyright IBM Corp. 2016, 2025
+// SPDX-License-Identifier: MPL-2.0
+
 //go:build nacl || plan9 || js || wasip1
 
 package sockaddr
