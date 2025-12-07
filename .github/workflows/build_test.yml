@@ -16,7 +16,7 @@ jobs:
               - 'stable'
         steps:
             - name: Checkout Code
-              uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+              uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
             - name: Setup Go
               uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
               with:
@@ -40,7 +40,7 @@ jobs:
           target: [linux-amd64, windows-amd64, darwin-arm64, aix-ppc64, solaris-amd64]
       steps:
           - name: Checkout Code
-            uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+            uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
           - name: Setup Go
             uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
             with:
@@ -52,4 +52,4 @@ jobs:
                 echo "GOARCH=$(echo ${{ matrix.target }} | cut -d - -f2)"
               } >> "$GITHUB_ENV"
           - name: Run Linter
-            uses: golangci/golangci-lint-action@e7fa5ac41e1cf5b7d48e45e42232ce7ada589601 # v9.1.0
+            uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
