@@ -64,5 +64,5 @@ func (ri routeInfo) GetDefaultInterfaceNameLegacy() (string, error) {
 
 func hasPowershell() bool {
 	_, err := exec.LookPath("powershell")
-	return (err != nil)
+	return (err == nil)
 }
