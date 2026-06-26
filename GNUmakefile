@@ -22,21 +22,20 @@ $(GOCOVERHTML): $(GOCOVER_FILE)
 coverage_report:: $(GOCOVER_FILE)
 	go tool cover -html=$(GOCOVER_FILE)
 
-audit_tools::
-	@go get -u github.com/golang/lint/golint && echo "Installed golint:"
-	@go get -u github.com/fzipp/gocyclo && echo "Installed gocyclo:"
-	@go get -u github.com/remyoudompheng/go-misc/deadcode && echo "Installed deadcode:"
-	@go get -u github.com/client9/misspell/cmd/misspell && echo "Installed misspell:"
-	@go get -u github.com/gordonklaus/ineffassign && echo "Installed ineffassign:"
+deps::
+	@go install github.com/hashicorp/copywrite@b3e6599f43beff698f471c6f46888045453fa030 # v0.25.3
+	@go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@c0d3ddc9cf3faa61a4e378e879ece580256d76e5 # v2.12.2
 
-audit::
-	deadcode
-	go tool vet -all *.go
-	go tool vet -shadow=true *.go
-	golint *.go
-	ineffassign .
-	gocyclo -over 65 *.go
-	misspell *.go
+.PHONY: copywriteheaders
+copywriteheaders:
+	@echo "==> Running copywrite headers plan..."
+	@copywrite headers --plan
+	@echo "==> Done"
+
+lint::
+	@echo "==> Running linters..."
+	@golangci-lint run ./...
+	@echo "==> Done"
 
 clean::
 	rm -f $(GOCOVER_FILE) $(GOCOVERHTML)
