@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2016, 2025
+// Copyright IBM Corp. 2016, 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package sockaddr_test
@@ -41,7 +41,7 @@ func TestIfAttr_unix(t *testing.T) {
 	}
 }
 
-func testSockAddrAttr(t *testing.T, sai interface{}) {
+func testSockAddrAttr(t *testing.T, sai any) {
 	attrNamesPerType := []struct {
 		name     sockaddr.AttrName
 		ipv4Pass bool

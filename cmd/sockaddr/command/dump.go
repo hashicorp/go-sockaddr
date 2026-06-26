@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2016, 2025
+// Copyright IBM Corp. 2016, 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package command
@@ -170,7 +170,7 @@ func (c *DumpCommand) dumpSockAddr(sa sockaddr.SockAddr) {
 
 	// outFmt is a small helper function to reduce the tedium below.  outFmt
 	// returns a new slice and expects the value to already be a string.
-	outFmt := func(o []string, k sockaddr.AttrName, v interface{}) []string {
+	outFmt := func(o []string, k sockaddr.AttrName, v any) []string {
 		if !allowedAttr(k) {
 			return o
 		}

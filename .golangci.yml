@@ -1,0 +1,16 @@
+# Copyright IBM Corp. 2016, 2026
+# SPDX-License-Identifier: MPL-2.0
+
+version: "2"
+
+linters:
+  enable:
+    - gocyclo
+    - govet
+    - ineffassign
+    - misspell
+    - modernize
+    - staticcheck
+  settings:
+    gocyclo:
+      min-complexity: 60

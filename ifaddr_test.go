@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2016, 2025
+// Copyright IBM Corp. 2016, 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package sockaddr_test
@@ -49,7 +49,7 @@ func havePublicIP() bool {
 }
 
 func TestGetPrivateIP(t *testing.T) {
-	reportOnPrivate := func(args ...interface{}) {
+	reportOnPrivate := func(args ...any) {
 		if havePrivateIP() {
 			t.Fatalf(args[0].(string), args[1:]...)
 		} else {
@@ -67,7 +67,7 @@ func TestGetPrivateIP(t *testing.T) {
 }
 
 func TestGetPrivateIPs(t *testing.T) {
-	reportOnPrivate := func(args ...interface{}) {
+	reportOnPrivate := func(args ...any) {
 		if havePrivateIP() {
 			t.Fatalf(args[0].(string), args[1:]...)
 		} else {
@@ -85,7 +85,7 @@ func TestGetPrivateIPs(t *testing.T) {
 }
 
 func TestGetPublicIP(t *testing.T) {
-	reportOnPublic := func(args ...interface{}) {
+	reportOnPublic := func(args ...any) {
 		if havePublicIP() {
 			t.Fatalf(args[0].(string), args[1:]...)
 		} else {
@@ -103,7 +103,7 @@ func TestGetPublicIP(t *testing.T) {
 }
 
 func TestGetPublicIPs(t *testing.T) {
-	reportOnPublic := func(args ...interface{}) {
+	reportOnPublic := func(args ...any) {
 		if havePublicIP() {
 			t.Fatalf(args[0].(string), args[1:]...)
 		} else {

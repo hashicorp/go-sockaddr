@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2016, 2025
+// Copyright IBM Corp. 2016, 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package template
@@ -105,7 +105,7 @@ func init() {
 
 // Attr returns the attribute from the ifAddrRaw argument.  If the argument is
 // an IfAddrs, only the first element will be evaluated for resolution.
-func Attr(selectorName string, ifAddrsRaw interface{}) (string, error) {
+func Attr(selectorName string, ifAddrsRaw any) (string, error) {
 	switch v := ifAddrsRaw.(type) {
 	case sockaddr.IfAddr:
 		return sockaddr.IfAttr(selectorName, v)

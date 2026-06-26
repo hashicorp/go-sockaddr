@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2016, 2025
+// Copyright IBM Corp. 2016, 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package sockaddr
@@ -566,7 +566,7 @@ func bigIntToNetIPv6(bi *big.Int) *net.IP {
 	x := make(net.IP, IPv6len)
 	ipv6Bytes := bi.Bytes()
 
-	// It's possibe for ipv6Bytes to be less than IPv6len bytes in size.  If
+	// It's possible for ipv6Bytes to be less than IPv6len bytes in size.  If
 	// they are different sizes we to pad the size of response.
 	if len(ipv6Bytes) < IPv6len {
 		buf := new(bytes.Buffer)
