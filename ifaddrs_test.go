@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2016, 2025
+// Copyright IBM Corp. 2016, 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package sockaddr_test
@@ -683,7 +683,7 @@ func TestGetIfAddrs(t *testing.T) {
 // TestGetDefaultIfName tests to make sure a default interface name is always
 // returned from getDefaultIfName().
 func TestGetDefaultInterface(t *testing.T) {
-	reportOnDefault := func(args ...interface{}) {
+	reportOnDefault := func(args ...any) {
 		if havePublicIP() || havePrivateIP() {
 			t.Fatalf(args[0].(string), args[1:]...)
 		} else {
@@ -793,7 +793,7 @@ func TestGetAllInterfaces(t *testing.T) {
 }
 
 func TestGetDefaultInterfaces(t *testing.T) {
-	reportOnDefault := func(args ...interface{}) {
+	reportOnDefault := func(args ...any) {
 		if havePublicIP() || havePrivateIP() {
 			t.Fatalf(args[0].(string), args[1:]...)
 		} else {
@@ -812,7 +812,7 @@ func TestGetDefaultInterfaces(t *testing.T) {
 }
 
 func TestGetPrivateInterfaces(t *testing.T) {
-	reportOnPrivate := func(args ...interface{}) {
+	reportOnPrivate := func(args ...any) {
 		if havePrivateIP() {
 			t.Fatalf(args[0].(string), args[1:]...)
 		} else {
@@ -835,7 +835,7 @@ func TestGetPrivateInterfaces(t *testing.T) {
 }
 
 func TestGetPublicInterfaces(t *testing.T) {
-	reportOnPublic := func(args ...interface{}) {
+	reportOnPublic := func(args ...any) {
 		if havePublicIP() {
 			t.Fatalf(args[0].(string), args[1:]...)
 		} else {
@@ -1438,7 +1438,7 @@ func TestUniqueIfAddrsBy(t *testing.T) {
 				t.Fatalf("%s: failed uniquify by attribute %s", test.name, test.selector)
 			}
 
-			for i := 0; i < len(uniqueAddrs); i++ {
+			for i := range uniqueAddrs {
 				got := uniqueAddrs[i].String()
 				if got != test.expected[i] {
 					t.Fatalf("%s: expected %q got %q", test.name, test.expected[i], got)
@@ -1994,7 +1994,7 @@ func TestSortIfBy(t *testing.T) {
 				t.Fatalf("wrong len")
 			}
 
-			for i := 0; i < len(sorted); i++ {
+			for i := range sorted {
 				if !reflect.DeepEqual(sorted[i], test.out[i]) {
 					t.Errorf("wrong sort order: %d %v %v", i, sorted[i], test.out[i])
 				}

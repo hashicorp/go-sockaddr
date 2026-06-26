@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2016, 2025
+// Copyright IBM Corp. 2016, 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package sockaddr
@@ -509,7 +509,7 @@ func IfByRFC(selectorParam string, ifAddrs IfAddrs) (matched, remainder IfAddrs,
 // up in both the included and excluded list.
 func IfByRFCs(selectorParam string, ifAddrs IfAddrs) (matched, remainder IfAddrs, err error) {
 	var includedIfs, excludedIfs IfAddrs
-	for _, rfcStr := range strings.Split(selectorParam, "|") {
+	for rfcStr := range strings.SplitSeq(selectorParam, "|") {
 		includedRFCIfs, excludedRFCIfs, err := IfByRFC(rfcStr, ifAddrs)
 		if err != nil {
 			return IfAddrs{}, IfAddrs{}, fmt.Errorf("unable to lookup RFC number %q: %v", rfcStr, err)
@@ -624,7 +624,7 @@ func IfByFlag(inputFlags string, ifAddrs IfAddrs) (matched, remainder IfAddrs, e
 		wantUnspecified bool
 	var ifFlags net.Flags
 	var checkFlags, checkAttrs bool
-	for _, flagName := range strings.Split(strings.ToLower(inputFlags), "|") {
+	for flagName := range strings.SplitSeq(strings.ToLower(inputFlags), "|") {
 		switch flagName {
 		case "broadcast":
 			checkFlags = true
@@ -712,7 +712,7 @@ func IfByFlag(inputFlags string, ifAddrs IfAddrs) (matched, remainder IfAddrs, e
 // network passed in by selector.
 func IfByNetwork(selectorParam string, inputIfAddrs IfAddrs) (IfAddrs, IfAddrs, error) {
 	var includedIfs, excludedIfs IfAddrs
-	for _, netStr := range strings.Split(selectorParam, "|") {
+	for netStr := range strings.SplitSeq(selectorParam, "|") {
 		netAddr, err := NewIPAddr(netStr)
 		if err != nil {
 			return nil, nil, fmt.Errorf("unable to create an IP address from %+q: %v", netStr, err)
@@ -897,11 +897,7 @@ func IfAddrMath(operation, value string, inputIfAddr IfAddr) (IfAddr, error) {
 			maskedIpv4 := ipv4.NetIP().Mask(ipv4Mask)
 			maskedIpv4Uint32 := binary.BigEndian.Uint32(maskedIpv4)
 
-			maskedIpv4MaskUint32 := uint32(ipv4.Mask)
-
-			if ipv4MaskUint32 < maskedIpv4MaskUint32 {
-				maskedIpv4MaskUint32 = ipv4MaskUint32
-			}
+			maskedIpv4MaskUint32 := min(ipv4MaskUint32, uint32(ipv4.Mask))
 
 			return IfAddr{
 				SockAddr: IPv4Addr{
@@ -1184,8 +1180,8 @@ func (ifAddr IfAddr) String() string {
 // parseDefaultIfNameFromRoute parses standard route(8)'s output for the *BSDs
 // and Solaris.
 func parseDefaultIfNameFromRoute(routeOut string) (string, error) {
-	lines := strings.Split(routeOut, "\n")
-	for _, line := range lines {
+	lines := strings.SplitSeq(routeOut, "\n")
+	for line := range lines {
 		kvs := strings.SplitN(line, ":", 2)
 		if len(kvs) != 2 {
 			continue
@@ -1263,8 +1259,8 @@ func parseDefaultIfNameWindows(routeOut, ipconfigOut string) (string, error) {
 // issues with localized Windows versions, but is currently retained for backward
 // compatibility.
 func parseDefaultIPAddrWindowsRoute(routeOut string) (string, error) {
-	lines := strings.Split(routeOut, "\n")
-	for _, line := range lines {
+	lines := strings.SplitSeq(routeOut, "\n")
+	for line := range lines {
 		kvs := whitespaceRE.Split(strings.TrimSpace(line), -1)
 		if len(kvs) < 3 {
 			continue

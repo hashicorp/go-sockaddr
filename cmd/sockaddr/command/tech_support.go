@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2016, 2025
+// Copyright IBM Corp. 2016, 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package command
@@ -80,7 +80,7 @@ func (c *TechSupportCommand) Run(args []string) int {
 	ri.VisitCommands(func(name string, cmd []string) {
 		out, err := exec.Command(cmd[0], cmd[1:]...).Output()
 		if err != nil {
-			out = []byte(fmt.Sprintf("ERROR: command %q failed: %v", name, err))
+			out = fmt.Appendf(out, "ERROR: command %q failed: %v", name, err)
 		}
 
 		output[name] = cmdResult{
@@ -170,7 +170,7 @@ func (c *TechSupportCommand) parseOpts(args []string) ([]string, error) {
 	return c.flags.Args(), nil
 }
 
-func (c *TechSupportCommand) rowWriterOutputFactory() func(valueVerb, key string, val interface{}) {
+func (c *TechSupportCommand) rowWriterOutputFactory() func(valueVerb, key string, val any) {
 	type _Fmt string
 	type _Verb string
 	var lineNoFmt string
@@ -200,7 +200,7 @@ func (c *TechSupportCommand) rowWriterOutputFactory() func(valueVerb, key string
 	}
 
 	var count int
-	return func(valueVerb, key string, val interface{}) {
+	return func(valueVerb, key string, val any) {
 		count++
 
 		keyFmt, ok := fmtMap[keyVerb]

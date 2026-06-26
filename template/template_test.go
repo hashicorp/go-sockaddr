@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2016, 2025
+// Copyright IBM Corp. 2016, 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package template_test
@@ -380,7 +380,6 @@ func TestSockAddr_Parse(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		test := test // capture range variable
 		if test.name == "" {
 			t.Fatalf("test number %d has an empty test name", i)
 		}
