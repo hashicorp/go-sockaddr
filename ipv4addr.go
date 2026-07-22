@@ -34,7 +34,7 @@ var trailingHexNetmaskRE *regexp.Regexp
 
 // IPv4Addr implements a convenience wrapper around the union of Go's
 // built-in net.IP and net.IPNet types.  In UNIX-speak, IPv4Addr implements
-// `sockaddr` when the the address family is set to AF_INET
+// `sockaddr` when the address family is set to AF_INET
 // (i.e. `sockaddr_in`).
 type IPv4Addr struct {
 	IPAddr

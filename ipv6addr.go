@@ -53,7 +53,7 @@ func init() {
 
 // IPv6Addr implements a convenience wrapper around the union of Go's
 // built-in net.IP and net.IPNet types.  In UNIX-speak, IPv6Addr implements
-// `sockaddr` when the the address family is set to AF_INET6
+// `sockaddr` when the address family is set to AF_INET6
 // (i.e. `sockaddr_in6`).
 type IPv6Addr struct {
 	IPAddr
@@ -63,7 +63,7 @@ type IPv6Addr struct {
 }
 
 // NewIPv6Addr creates an IPv6Addr from a string.  String can be in the form of
-// an an IPv6:port (e.g. `[2001:4860:0:2001::68]:80`, in which case the mask is
+// an IPv6:port (e.g. `[2001:4860:0:2001::68]:80`, in which case the mask is
 // assumed to be a /128), an IPv6 address (e.g. `2001:4860:0:2001::68`, also
 // with a `/128` mask), an IPv6 CIDR (e.g. `2001:4860:0:2001::68/64`, which has
 // its IP port initialized to zero).  ipv6Str can not be a hostname.
