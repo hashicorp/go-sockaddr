@@ -423,6 +423,10 @@ func IfByAddress(inputRe string, ifAddrs IfAddrs) (matched, remainder IfAddrs, e
 // IfByName returns a list of matched and non-matched IfAddrs, or an error if
 // the regexp fails to compile.
 func IfByName(inputRe string, ifAddrs IfAddrs) (matched, remainder IfAddrs, err error) {
+	inputRe = strings.TrimSpace(inputRe)
+	if inputRe == "" {
+		return nil, nil, fmt.Errorf("unable to compile name regexp: empty pattern")
+	}
 	re, err := regexp.Compile(inputRe)
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to compile name regexp %+q: %v", inputRe, err)
