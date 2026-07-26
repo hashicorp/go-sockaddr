@@ -6,6 +6,7 @@ package sockaddr
 import (
 	"os/exec"
 	"strings"
+	"syscall"
 )
 
 var cmds map[string][]string = map[string][]string{
@@ -14,6 +15,20 @@ var cmds map[string][]string = map[string][]string{
 	// when it is.
 	"netstat":  {"netstat", "-rn"},
 	"ipconfig": {"ipconfig"},
+}
+
+// createNoWindow (CREATE_NO_WINDOW) prevents a console window from appearing when spawning
+// helper utilities from a non-console (GUI / service) parent process.
+const createNoWindow = 0x08000000
+
+// hiddenCommand builds an exec.Cmd that does not flash a console window on Windows.
+func hiddenCommand(name string, arg ...string) *exec.Cmd {
+	cmd := exec.Command(name, arg...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		HideWindow:    true,
+		CreationFlags: createNoWindow,
+	}
+	return cmd
 }
 
 // NewRouteInfo returns a BSD-specific implementation of the RouteInfo
@@ -32,7 +47,7 @@ func (ri routeInfo) GetDefaultInterfaceName() (string, error) {
 		return ri.GetDefaultInterfaceNameLegacy()
 	}
 
-	ifNameOut, err := exec.Command(cmds["defaultInterface"][0], cmds["defaultInterface"][1:]...).Output()
+	ifNameOut, err := hiddenCommand(cmds["defaultInterface"][0], cmds["defaultInterface"][1:]...).Output()
 	if err != nil {
 		return "", err
 	}
@@ -44,12 +59,12 @@ func (ri routeInfo) GetDefaultInterfaceName() (string, error) {
 // GetDefaultInterfaceNameLegacy provides legacy behavior for GetDefaultInterfaceName
 // on Windows machines without powershell.
 func (ri routeInfo) GetDefaultInterfaceNameLegacy() (string, error) {
-	ifNameOut, err := exec.Command(cmds["netstat"][0], cmds["netstat"][1:]...).Output()
+	ifNameOut, err := hiddenCommand(cmds["netstat"][0], cmds["netstat"][1:]...).Output()
 	if err != nil {
 		return "", err
 	}
 
-	ipconfigOut, err := exec.Command(cmds["ipconfig"][0], cmds["ipconfig"][1:]...).Output()
+	ipconfigOut, err := hiddenCommand(cmds["ipconfig"][0], cmds["ipconfig"][1:]...).Output()
 	if err != nil {
 		return "", err
 	}
