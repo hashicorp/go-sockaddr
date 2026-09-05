@@ -21,21 +21,31 @@ func NewRouteInfo() (routeInfo, error) {
 	}
 
 	return routeInfo{
-		cmds: map[string][]string{"ip": {path, "route"}},
+		cmds: map[string][]string{
+			"ip":  {path, "route"},
+			"ip6": {path, "-6", "route"},
+		},
 	}, nil
 }
 
 // GetDefaultInterfaceName returns the interface name attached to the default
-// route on the default interface.
+// route on the default interface. IPv4 is preferred; IPv6 is used when no IPv4
+// default route is present.
 func (ri routeInfo) GetDefaultInterfaceName() (string, error) {
-	out, err := exec.Command(ri.cmds["ip"][0], ri.cmds["ip"][1:]...).Output()
-	if err != nil {
-		return "", err
+	for _, name := range []string{"ip", "ip6"} {
+		cmd, ok := ri.cmds[name]
+		if !ok || len(cmd) == 0 {
+			continue
+		}
+		out, err := exec.Command(cmd[0], cmd[1:]...).Output()
+		if err != nil {
+			continue
+		}
+		ifName, err := parseDefaultIfNameFromIPCmd(string(out))
+		if err != nil {
+			continue
+		}
+		return ifName, nil
 	}
-
-	var ifName string
-	if ifName, err = parseDefaultIfNameFromIPCmd(string(out)); err != nil {
-		return "", errors.New("no default interface found")
-	}
-	return ifName, nil
+	return "", errors.New("no default interface found")
 }
