@@ -21,7 +21,10 @@ func NewRouteInfo() (routeInfo, error) {
 	}
 
 	return routeInfo{
-		cmds: map[string][]string{"ip": {path, "route"}},
+		cmds: map[string][]string{
+			"ip":  {path, "route"},
+			"ip6": {path, "-6", "route"},
+		},
 	}, nil
 }
 
@@ -29,6 +32,13 @@ func NewRouteInfo() (routeInfo, error) {
 // route on the default interface.
 func (ri routeInfo) GetDefaultInterfaceName() (string, error) {
 	out, err := exec.Command(ri.cmds["ip"][0], ri.cmds["ip"][1:]...).Output()
+	if err == nil {
+		if ifName, err := parseDefaultIfNameFromIPCmd(string(out)); err == nil {
+			return ifName, nil
+		}
+	}
+
+	out, err = exec.Command(ri.cmds["ip6"][0], ri.cmds["ip6"][1:]...).Output()
 	if err != nil {
 		return "", err
 	}

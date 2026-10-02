@@ -60,6 +60,12 @@ func Test_parseLinuxDefaultIfName(t *testing.T) {
 `,
 			want: "wlan0",
 		},
+		{
+			name: "Linux IPv6 - Common",
+			routeOut: `default via fe80::250:56ff:fe9e:c72 dev ens192 proto ra metric 1024 pref medium
+`,
+			want: "ens192",
+		},
 	}
 
 	for _, tc := range testCases {
