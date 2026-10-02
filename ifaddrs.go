@@ -1200,16 +1200,44 @@ func parseDefaultIfNameFromRoute(routeOut string) (string, error) {
 // Linux.
 func parseDefaultIfNameFromIPCmd(routeOut string) (string, error) {
 	parsedLines := parseIfNameFromIPCmd(routeOut)
+	var inDefaultBlock bool
 	for _, parsedLine := range parsedLines {
-		if parsedLine[0] == "default" &&
-			parsedLine[1] == "via" &&
-			parsedLine[3] == "dev" {
-			ifName := strings.TrimSpace(parsedLine[4])
-			return ifName, nil
+		if len(parsedLine) == 0 {
+			continue
+		}
+
+		if parsedLine[0] == "default" {
+			if ifName := findDevIfName(parsedLine); ifName != "" {
+				return ifName, nil
+			}
+			inDefaultBlock = true
+			continue
+		}
+
+		if inDefaultBlock {
+			if parsedLine[0] == "nexthop" {
+				if ifName := findDevIfName(parsedLine); ifName != "" {
+					return ifName, nil
+				}
+				continue
+			}
+			inDefaultBlock = false
 		}
 	}
 
 	return "", errors.New("no default interface found")
+}
+
+func findDevIfName(tokens []string) string {
+	for i, token := range tokens {
+		if token == "dev" && i+1 < len(tokens) {
+			ifName := strings.TrimSpace(tokens[i+1])
+			if ifName != "" {
+				return ifName
+			}
+		}
+	}
+	return ""
 }
 
 // parseIfNameFromIPCmd parses interfaces from ip(8) for
@@ -1218,10 +1246,11 @@ func parseIfNameFromIPCmd(routeOut string) [][]string {
 	lines := strings.Split(routeOut, "\n")
 	parsedLines := make([][]string, 0, len(lines))
 	for _, line := range lines {
-		kvs := whitespaceRE.Split(line, -1)
-		if len(kvs) < 5 {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" {
 			continue
 		}
+		kvs := whitespaceRE.Split(trimmed, -1)
 		parsedLines = append(parsedLines, kvs)
 	}
 	return parsedLines
