@@ -60,6 +60,36 @@ func Test_parseLinuxDefaultIfName(t *testing.T) {
 `,
 			want: "wlan0",
 		},
+		{
+			name: "Linux ECMP - Equivalent Routing Tab-Indented",
+			routeOut: `default
+	nexthop via 223.110.247.129 dev bond0 weight 1
+	nexthop via 223.110.247.129 dev bond1 weight 1
+10.1.2.0/24 dev eth0 proto kernel scope link src 10.1.2.5
+`,
+			want: "bond0",
+		},
+		{
+			name: "Linux ECMP - Equivalent Routing Space-Indented",
+			routeOut: `default
+    nexthop via 223.110.247.129 dev bond0 weight 1
+    nexthop via 223.110.247.129 dev bond1 weight 1
+`,
+			want: "bond0",
+		},
+		{
+			name: "Linux Direct Route - Scope link without via",
+			routeOut: `default dev eth0 scope link
+10.1.2.0/24 dev eth0 proto kernel scope link src 10.1.2.5
+`,
+			want: "eth0",
+		},
+		{
+			name: "Linux Direct Route - Simple dev without via",
+			routeOut: `default dev eth0
+`,
+			want: "eth0",
+		},
 	}
 
 	for _, tc := range testCases {
@@ -73,6 +103,15 @@ func Test_parseLinuxDefaultIfName(t *testing.T) {
 				t.Errorf("got %+q; want %+q", got, tc.want)
 			}
 		})
+	}
+}
+
+func Test_parseLinuxDefaultIfName_notFound(t *testing.T) {
+	routeOut := `10.1.2.0/24 dev eth0 proto kernel scope link src 10.1.2.5
+`
+	_, err := parseDefaultIfNameFromIPCmd(routeOut)
+	if err == nil {
+		t.Fatal("expected error when no default route exists, got nil")
 	}
 }
 
