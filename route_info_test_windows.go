@@ -1,9 +1,44 @@
-// Copyright IBM Corp. 2016, 2025
+// Copyright IBM Corp. 2016, 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package sockaddr
 
-import "testing"
+import (
+	"errors"
+	"os/exec"
+	"testing"
+)
+
+func Test_hasPowershell(t *testing.T) {
+	origLookPath := execLookPath
+	defer func() {
+		execLookPath = origLookPath
+	}()
+
+	execLookPath = func(file string) (string, error) {
+		if file == "powershell" {
+			return `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`, nil
+		}
+		return "", exec.ErrNotFound
+	}
+	if !hasPowershell() {
+		t.Errorf("hasPowershell() = false, want true when powershell exists")
+	}
+
+	execLookPath = func(file string) (string, error) {
+		return "", exec.ErrNotFound
+	}
+	if hasPowershell() {
+		t.Errorf("hasPowershell() = true, want false when powershell not found")
+	}
+
+	execLookPath = func(file string) (string, error) {
+		return "", errors.New("lookup error")
+	}
+	if hasPowershell() {
+		t.Errorf("hasPowershell() = true, want false on error")
+	}
+}
 
 func Test_parseWindowsDefaultIfName_new_vs_old(t *testing.T) {
 	if !hasPowershell() {
