@@ -6,7 +6,6 @@
 package sockaddr
 
 import (
-	"errors"
 	"os/exec"
 )
 
@@ -28,14 +27,8 @@ func NewRouteInfo() (routeInfo, error) {
 // GetDefaultInterfaceName returns the interface name attached to the default
 // route on the default interface.
 func (ri routeInfo) GetDefaultInterfaceName() (string, error) {
-	out, err := exec.Command(ri.cmds["ip"][0], ri.cmds["ip"][1:]...).Output()
-	if err != nil {
-		return "", err
-	}
-
-	var ifName string
-	if ifName, err = parseDefaultIfNameFromIPCmd(string(out)); err != nil {
-		return "", errors.New("no default interface found")
-	}
-	return ifName, nil
+	ip := ri.cmds["ip"]
+	return defaultInterfaceFromIPRoute(func(args ...string) ([]byte, error) {
+		return exec.Command(ip[0], args...).Output()
+	}, ip[1:])
 }
