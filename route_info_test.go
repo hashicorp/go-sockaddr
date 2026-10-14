@@ -40,6 +40,41 @@ destination: default
 	}
 }
 
+func TestDefaultInterfaceFromIPRouteIPv6Only(t *testing.T) {
+	calls := 0
+	name, err := defaultInterfaceFromIPRoute(func(args ...string) ([]byte, error) {
+		calls++
+		if len(args) > 0 && args[0] == "-6" {
+			return []byte("default via fe80::1 dev eth0 metric 1\n"), nil
+		}
+		return []byte(""), nil
+	}, []string{"route"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if name != "eth0" {
+		t.Fatalf("got %q; want eth0", name)
+	}
+	if calls != 2 {
+		t.Fatalf("ip was run %d times; want 2", calls)
+	}
+}
+
+func TestDefaultInterfaceFromIPRoutePrefersIPv4(t *testing.T) {
+	name, err := defaultInterfaceFromIPRoute(func(args ...string) ([]byte, error) {
+		if len(args) > 0 && args[0] == "-6" {
+			t.Fatal("ip -6 route ran even though the IPv4 table had a default route")
+		}
+		return []byte("default via 10.1.2.1 dev eth0 \n"), nil
+	}, []string{"route"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if name != "eth0" {
+		t.Fatalf("got %q; want eth0", name)
+	}
+}
+
 func Test_parseLinuxDefaultIfName(t *testing.T) {
 	testCases := []struct {
 		name     string
