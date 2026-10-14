@@ -245,7 +245,7 @@ func IfAttrs(selectorName string, ifAddrs IfAddrs) (string, error) {
 // available IP addresses on each interface and converts them to
 // sockaddr.IPAddrs, and returning the result as an array of IfAddr.
 func GetAllInterfaces() (IfAddrs, error) {
-	ifs, err := net.Interfaces()
+	ifs, err := NetInterfaces()
 	if err != nil {
 		return nil, err
 	}
@@ -264,10 +264,7 @@ func GetAllInterfaces() (IfAddrs, error) {
 				return IfAddrs{}, fmt.Errorf("unable to create an IP address from %q", addr.String())
 			}
 
-			ifAddr := IfAddr{
-				SockAddr:  ipAddr,
-				Interface: intf,
-			}
+			ifAddr := NewIfAddr(ipAddr, intf)
 			ifAddrs = append(ifAddrs, ifAddr)
 		}
 	}
